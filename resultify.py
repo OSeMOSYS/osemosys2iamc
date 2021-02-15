@@ -5,11 +5,6 @@ import os
 from typing import List, Dict
 from yaml import load, SafeLoader
 
-MODEL = 'GLUCOSE'
-REGION = 'World'
-SCENARIO = 'Baseline'
-VARIABLE = 'Primary Energy|Biomass'
-
 def read_file(filename: str) -> pd.DataFrame:
 
     df = pd.read_csv(filename)

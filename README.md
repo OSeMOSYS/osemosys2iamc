@@ -2,9 +2,17 @@
 
 Convert OSeMOSYS results to IAMC format
 
+## Run the demo
+
+    python resultify.py results config.yaml  test.csv
+
+Check out the IAMC formatted results in `test.csv`
+
+## IAMC Variables
+
 IAMC variables can be found [here](https://data.ene.iiasa.ac.at/iamc-1.5c-explorer/#/docs)
 
-## Primary Energy
+### Primary Energy
 
 Primary Energy
 Primary Energy|Biomass
