@@ -1,0 +1,36 @@
+model: GLUCOSE
+scenario: Baseline
+results:
+- iamc_variable: "Primary Energy|Biomass"
+  technology:
+    - name: C1BMCHP00
+      unit: EJ/y
+    - name: C1BMIGPCS
+      unit: EJ/y
+    - name: C1BMSCP00
+      unit: EJ/y
+  osemosys_param: TotalTechnologyAnnualActivity
+- iamc_variable: "Primary Energy|Coal"
+  technology:
+    - name: C1COCHP00
+      unit: EJ/y
+    - name: C1COIGP00
+      unit: EJ/y
+    - name: C1COSCP00
+      unit: EJ/y
+    - name: C1COSCPCS
+      unit: EJ/y
+  osemosys_param: TotalTechnologyAnnualActivity
+- iamc_variable: "Primary Energy|Gas"
+  technology:
+    - name: C1NGCCP00
+      unit: EJ/y
+    - name: C1NGCCPCH
+      unit: EJ/y
+    - name: C1NGCCPCS
+      unit: EJ/y
+    - name: C1NGGCP00
+      unit: EJ/y
+    - name: C1NGGCPCH
+      unit: EJ/y
+  osemosys_param: TotalTechnologyAnnualActivity
