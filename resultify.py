@@ -11,6 +11,13 @@ def read_file(filename: str) -> pd.DataFrame:
 
     return df
 
+def filter_fuel(df: pd.DataFrame, technologies: List, fuels: List) -> pd.DataFrame:
+
+    mask = df.TECHNOLOGY.isin(technologies)
+    fuel_mask = df.FUEL.isin(fuels)
+
+    return df[mask & fuel_mask]
+
 def extract_results(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
 
     mask = df.TECHNOLOGY.isin(technologies)
