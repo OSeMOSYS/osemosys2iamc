@@ -14,6 +14,8 @@ IAMC variables can be found [here](https://data.ene.iiasa.ac.at/iamc-1.5c-explor
 
 ### Primary Energy
 
+Level | Commodity
+---|---
 Primary Energy
 Primary Energy|Biomass
 Primary Energy|Coal
@@ -32,16 +34,23 @@ Primary Energy|Wind
 
 # Priority Variables
 
+Level | Commodity | Fuel
+---|---|---
 Secondary Energy|Electricity|Coal, w/ and w/o CCS
 Secondary Energy|Liquids|Coal
 Secondary Energy|Gases|Coal
 Secondary Energy|Solids|Coal
 Secondary Energy|hydrogen|Coal, w/ and w/o CCS
 
+Level | Commodity | Fuel
+---|---|---
 Final Energy|Solids|Coal
 Final Energy|Industry|Solids|Coal
 Final Energy|Residential and Commercial|Solids|Coal
 Final Energy|Other Sector|Solids|Coal
+
+Level | Commodity | Sector | Sector
+---|---|---|---
 Emissions|CO2|Energy and Industrial Processes
 Emissions|CO2|Energy|Supply
 Emissions|CO2|Energy|Supply|Electricity
@@ -54,6 +63,9 @@ Emissions|CO2|Energy|Demand|Agriculture
 Emissions|CO2|Energy|Demand|Other Sector
 Emissions|CO2|Industrial Processes
 Emissions|CO2|AFOLU
+
+Level | Commodity | Technology | Type
+---|---|---|---
 Capacity|Electricity|Solar|PV
 Capacity|Electricity|Solar|CSP
 Capacity|Electricity|Wind

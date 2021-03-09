@@ -31,3 +31,23 @@ results:
   fuel: [C1_S_ELC]
   unit: EJ/yr
   osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: "Capacity|Electricity|Solar|PV"
+  technology: [C1SOV1P00, C1SOV2P00]
+  unit: TW
+  osemosys_param: TotalCapacityAnnual
+- iamc_variable: "Capacity|Electricity|Solar|CSP"
+  technology: [C1SOC1P00]
+  unit: TW
+  osemosys_param: TotalCapacityAnnual
+- iamc_variable: "Capacity|Electricity|Wind"
+  technology: [C1WDOFP00,C1WDONP00]
+  unit: TW
+  osemosys_param: TotalCapacityAnnual
+- iamc_variable: "Capacity|Electricity|Wind|Offshore"
+  technology: [C1WDOFP00]
+  unit: TW
+  osemosys_param: TotalCapacityAnnual
+- iamc_variable: "Capacity|Electricity|Wind|Onshore"
+  technology: [C1WDONP00]
+  unit: TW
+  osemosys_param: TotalCapacityAnnual
