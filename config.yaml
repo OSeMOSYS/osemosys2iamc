@@ -2,35 +2,32 @@ model: GLUCOSE
 scenario: Baseline
 results:
 - iamc_variable: "Primary Energy|Biomass"
-  technology:
-    - name: C1BMCHP00
-      unit: EJ/y
-    - name: C1BMIGPCS
-      unit: EJ/y
-    - name: C1BMSCP00
-      unit: EJ/y
-  osemosys_param: TotalTechnologyAnnualActivity
+  technology: [C1BMBRFH1, C1BMBRFN1, C1BMCHP00, C1BMHTF03, C1BMIGPCS, C1BMLP000, C1BMSCP00]
+  fuel: [C1_P_BIOW]
+  unit: EJ/yr
+  osemosys_param: UseByTechnology
 - iamc_variable: "Primary Energy|Coal"
-  technology:
-    - name: C1COCHP00
-      unit: EJ/y
-    - name: C1COIGP00
-      unit: EJ/y
-    - name: C1COSCP00
-      unit: EJ/y
-    - name: C1COSCPCS
-      unit: EJ/y
-  osemosys_param: TotalTechnologyAnnualActivity
+  technology: [C1CO00I00]
+  fuel: [C1_P_HCO]
+  unit: EJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
 - iamc_variable: "Primary Energy|Gas"
-  technology:
-    - name: C1NGCCP00
-      unit: EJ/y
-    - name: C1NGCCPCH
-      unit: EJ/y
-    - name: C1NGCCPCS
-      unit: EJ/y
-    - name: C1NGGCP00
-      unit: EJ/y
-    - name: C1NGGCPCH
-      unit: EJ/y
-  osemosys_param: TotalTechnologyAnnualActivity
+  technology: [C1NG00I00]
+  fuel: [C1_P_GAS]
+  unit: EJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: "Primary Energy|Hydro"
+  technology: [C1HYDMP00, C1HYMIP00]
+  fuel: [C1_S_ELC]
+  unit: EJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: "Primary Energy|Nuclear"
+  technology: [C1NU00I00]
+  fuel: [C1_P_NUC]
+  unit: EJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: "Primary Energy|Solar"
+  technology: [C1SOC1P00, C1SOV1P00, C1SOV2P00, C1SOTHF00]
+  fuel: [C1_S_ELC]
+  unit: EJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
