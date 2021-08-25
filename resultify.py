@@ -1,3 +1,16 @@
+"""Create an IAMC dataset from a package of OSeMOSYS results
+
+Run the command::
+
+    python resultify.py <results_path> <config_path> <output_path>"
+
+where:
+
+    ``results_path`` is the path to the folder of CSV files holding OSeMOSYS results
+    ``config_path`` is the path to the ``config.yaml`` file containing the results mapping
+    ``output_path`` is the path to the csv file written out in IAMC format
+
+"""
 import pandas as pd
 import pyam
 import sys
@@ -14,24 +27,28 @@ def read_file(filename) -> pd.DataFrame:
     return df
 
 def filter_fuel(df: pd.DataFrame, technologies: List, fuels: List) -> pd.DataFrame:
-
+    """Return rows which match ``technologies`` and ``fuels``
+    """
     mask = df.TECHNOLOGY.isin(technologies)
     fuel_mask = df.FUEL.isin(fuels)
 
     return df[mask & fuel_mask]
 
 def filter_emission(df: pd.DataFrame, emission: List) -> pd.DataFrame:
-    """Extracts just rows which match contents of ``emission`` and fill region name from technology column
+    """Return rows which match ``emission`` and fill region name from technology
     """
 
     mask = df.EMISSION.isin(emission)
 
+    # First two characters in technology match ISO2 country name
     df['REGION'] = df['TECHNOLOGY'].str[0:2]
     df = df.drop(columns='TECHNOLOGY')
 
     return df[mask]
 
 def extract_results(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
+    """Return rows which match ``technologies``
+    """
 
     mask = df.TECHNOLOGY.isin(technologies)
 
@@ -81,13 +98,23 @@ def make_iamc(data: pd.DataFrame,
 
 def load_config(filepath: str) -> Dict:
     """Reads the configuration file
+
+    Arguments
+    ---------
+    filepath : str
+        The path to the config file
     """
     with open(filepath, 'r') as configfile:
         config = load(configfile, Loader=SafeLoader)
     return config
 
-def make_plots(df, model, scenario):
+def make_plots(df, model: str, scenario: str):
     """Creates standard plots
+
+    Arguments
+    ---------
+    model: str
+    scenario: str
     """
 
     args = dict(model=model, scenario=scenario)
@@ -125,7 +152,15 @@ def make_plots(df, model, scenario):
 
 
 def main(config: Dict) -> pyam.IamDataFrame:
-    """
+    """Create the IAM data frame from results
+
+    Loops over each entry in the configuration file, extracts the data from
+    the relevant result file and puts this into the IAMC data format
+
+    Arguments
+    ---------
+    config : dict
+        The configuration dictionary
     """
     blob = []
     for result in config['results']:
