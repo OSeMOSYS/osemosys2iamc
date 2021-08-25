@@ -52,3 +52,7 @@ MANIFEST
 
 # Plots
 *.pdf
+
+# Outputs
+*.csv
+!tests/fixtures/*.csv

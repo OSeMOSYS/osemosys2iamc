@@ -1,6 +1,32 @@
 import pandas as pd
 import os
-from .resultify import filter_fuel
+from .resultify import filter_fuel, filter_emission
+
+
+class TestEmissions:
+
+    def test_filter_emission(self):
+
+        filepath = os.path.join("tests", 'fixtures', "AnnualTechnologyEmissions.csv")
+        input_data = pd.read_csv(filepath)
+
+        emission = ['CO2']
+        actual = filter_emission(input_data, emission)
+
+        data = [
+            ['AT', 'CO2', 2030, 3043.14883455963],
+            ['AT', 'CO2', 2031, 2189.064680841067],
+            ['AT', 'CO2', 2032, 2315.8212665203155],
+            ["BG", 'CO2', 2030, 11096.55693088164],
+            ["BG", 'CO2', 2031, 11069.257140908643],
+            ["BG", 'CO2', 2032, 11041.957354265856],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=['REGION', 'EMISSION', 'YEAR', 'VALUE'])
+
+        index = ['REGION', 'EMISSION', 'YEAR']
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
 
 class TestFilter:
 
