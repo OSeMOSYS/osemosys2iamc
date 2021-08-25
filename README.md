@@ -6,7 +6,7 @@ Convert OSeMOSYS results to IAMC format
 
     python resultify.py results config.yaml  test.csv
 
-Check out the IAMC formatted results in `test.csv`
+Check out the IAMC formatted results in `test.csv` and plots `emissions.csv`
 
 ## IAMC Variables
 
