@@ -46,6 +46,13 @@ def filter_emission(df: pd.DataFrame, emission: List) -> pd.DataFrame:
 
     return df[mask]
 
+def filter_primary_energy(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
+    """Return rows that indicate Primary Energy use/generation
+    """
+
+    
+    return df
+
 def extract_results(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
     """Return rows which match ``technologies``
     """

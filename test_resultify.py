@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-from .resultify import filter_fuel, filter_emission
+from .resultify import filter_fuel, filter_emission, filter_primary_energy
 
 
 class TestEmissions:
@@ -55,3 +55,17 @@ class TestFilter:
         index = ['REGION', 'TIMESLICE', 'TECHNOLOGY', 'FUEL', 'YEAR']
 
         pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+    
+class TestEnergy:
+
+    def test_filter_primary_energy(self):
+        filepath = os.path.join("test","fixtures","ProductionByTechnologyAnnual.csv")
+        input_data = pd.read_csv(filepath)
+
+        technologies = ['******I**']
+        actual = filter_primary_energy(input_data, technologies)
+
+        data = [
+            [],
+            []
+        ]
