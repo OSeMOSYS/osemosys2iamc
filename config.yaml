@@ -9,3 +9,7 @@ results:
   emission: ["**PM25"]
   unit: ktCO2/yr
   osemosys_param: AnnualTechnologyEmission
+- iamc_variable: 'Primary Energy'
+  primary_technology: [******I**,******O**,**HY*****,**OC*****,**SO*****,**WI*****]
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual

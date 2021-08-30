@@ -179,6 +179,9 @@ def main(config: Dict) -> pyam.IamDataFrame:
         elif 'emission' in result.keys():
             emission = result['emission']
             data = filter_emission(results, emission)
+        elif 'primary_technology' in result.keys():
+            technologies = result['primary_technology']
+            data = filter_primary_energy(results, technologies)
         else:
             data = extract_results(results, technologies)
         aggregated = aggregate_results(data)
