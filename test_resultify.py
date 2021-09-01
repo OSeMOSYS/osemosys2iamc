@@ -59,13 +59,27 @@ class TestFilter:
 class TestEnergy:
 
     def test_filter_primary_energy(self):
-        filepath = os.path.join("test","fixtures","ProductionByTechnologyAnnual.csv")
+        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
         input_data = pd.read_csv(filepath)
 
-        technologies = ['******I**']
+        technologies = ['****00I00','****00X00','**OC*****','**SO*****','**WI*****']
         actual = filter_primary_energy(input_data, technologies)
 
         data = [
-            [],
-            []
+            ['AT', 2015, 26.324108350683794],
+            ['AT', 2016, 26.324108350683794],
+            ['AT', 2017, 26.324108350683794],
+            ['AT', 2018, 26.324108350683787],
+            ['AT', 2019, 26.324108350683794],
+            ['CH', 2047, 69.9750212433476],
+            ['CH', 2048, 91.45662886581975],
+            ['CH', 2049, 76.86770297185006],
+            ['CH', 2050, 70.86078033897608],
+            ['CH', 2051, 53.88447040760964],
         ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)

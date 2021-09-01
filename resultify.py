@@ -49,9 +49,25 @@ def filter_emission(df: pd.DataFrame, emission: List) -> pd.DataFrame:
 def filter_primary_energy(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
     """Return rows that indicate Primary Energy use/generation
     """
-
+    for t in range(len(technologies)):
+        technologies[t] = technologies[t].replace('*','')
+    df['REGION'] = df['TECHNOLOGY'].str[:2]
+    df_f = pd.DataFrame(columns=['REGION','TECHNOLOGY','FUEL','YEAR','VALUE'])
+    for t in range(len(technologies)):
+        if len(technologies[t])==2:
+            mask = df['TECHNOLOGY'].str[2:4] == technologies[t]
+            df_t = df[mask]
+            df_f = df_f.append(df_t)
+        else:
+            mask = df['TECHNOLOGY'].str[4:] == technologies[t]
+            df_t = df[mask]
+            df_f = df_f.append(df_t)
     
-    return df
+    df = pd.DataFrame(columns=["REGION","YEAR","VALUE"])
+    for r in df_f["REGION"].unique():
+        for y in df_f["YEAR"].unique():
+            df = df.append({"REGION": r, "YEAR": y, "VALUE": df_f.loc[(df_f["REGION"]==r)&(df_f["YEAR"]==y),["VALUE"]].sum(axis=0).VALUE},ignore_index=True).sort_values(by=['REGION','YEAR'])
+    return df[df.VALUE != 0].reset_index(drop=True)
 
 def extract_results(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
     """Return rows which match ``technologies``
