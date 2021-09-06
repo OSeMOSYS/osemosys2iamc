@@ -62,7 +62,7 @@ class TestEnergy:
         filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
         input_data = pd.read_csv(filepath)
 
-        technologies = ['****00I00','****00X00','**OC*****','**SO*****','**WI*****']
+        technologies = ['^.{6}(I0)','^.{6}(X0)','^.{2}(HY)','^.{2}(OC)','^.{2}(SO)','^.{2}(WI)']
         actual = filter_primary_energy(input_data, technologies)
 
         data = [

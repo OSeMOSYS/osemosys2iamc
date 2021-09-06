@@ -49,19 +49,24 @@ def filter_emission(df: pd.DataFrame, emission: List) -> pd.DataFrame:
 def filter_primary_energy(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
     """Return rows that indicate Primary Energy use/generation
     """
-    for t in range(len(technologies)):
-        technologies[t] = technologies[t].replace('*','')
+    # technologies = ['^.{6}(I0)','^.{6}(X0)','^.{2}(HY)','^.{2}(OC)','^.{2}(SO)','^.{2}(WI)'] #for testing
+    # df = pd.read_csv('tests/fixtures/ProductionByTechnologyAnnual.csv') #for testing
+    # for t in range(len(technologies)):
+    #     technologies[t] = technologies[t].replace('*','')
     df['REGION'] = df['TECHNOLOGY'].str[:2]
     df_f = pd.DataFrame(columns=['REGION','TECHNOLOGY','FUEL','YEAR','VALUE'])
     for t in range(len(technologies)):
-        if len(technologies[t])==2:
-            mask = df['TECHNOLOGY'].str[2:4] == technologies[t]
-            df_t = df[mask]
-            df_f = df_f.append(df_t)
-        else:
-            mask = df['TECHNOLOGY'].str[4:] == technologies[t]
-            df_t = df[mask]
-            df_f = df_f.append(df_t)
+        mask = df['TECHNOLOGY'].str.contains(technologies[t])
+        df_t = df[mask]
+        df_f = df_f.append(df_t)
+        # if len(technologies[t])==2:
+        #     mask = df['TECHNOLOGY'].str[2:4] == technologies[t]
+        #     df_t = df[mask]
+        #     df_f = df_f.append(df_t)
+        # else:
+        #     mask = df['TECHNOLOGY'].str[4:] == technologies[t]
+        #     df_t = df[mask]
+        #     df_f = df_f.append(df_t)
     
     df = pd.DataFrame(columns=["REGION","YEAR","VALUE"])
     for r in df_f["REGION"].unique():
