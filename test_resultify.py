@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import pytest
 from .resultify import filter_fuel, filter_emission, filter_primary_energy, filter_final_energy
 
 
@@ -101,3 +102,12 @@ class TestEnergy:
         index = ["REGION", "YEAR"]
 
         pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+
+    def test_fuels_format_wrong(self):
+        filepath = os.path.join("tests","fixtures","Demand.csv")
+        input_data = pd.read_csv(filepath)
+        fuels = ['ELE']
+        with pytest.raises(SystemExit) as pytest_wrapped_e:
+            filter_final_energy(input_data, fuels)
+        assert pytest_wrapped_e.type == SystemExit
+        assert pytest_wrapped_e.value.code == 1
