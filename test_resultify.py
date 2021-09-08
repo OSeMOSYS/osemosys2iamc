@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-from .resultify import filter_fuel, filter_emission, filter_primary_energy
+from .resultify import filter_fuel, filter_emission, filter_primary_energy, filter_final_energy
 
 
 class TestEmissions:
@@ -79,6 +79,24 @@ class TestEnergy:
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+    
+    def test_filter_final_energy(self):
+        filepath = os.path.join("tests","fixtures","Demand.csv")
+        input_data = pd.read_csv(filepath)
+
+        fuels = ['E2']
+        actual = filter_final_energy(input_data, fuels)
+
+        data = [
+            ['AT',2015,227.5944502],
+            ['BE',2016,296.0570016],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
         index = ["REGION", "YEAR"]
 

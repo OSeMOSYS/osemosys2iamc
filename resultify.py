@@ -62,6 +62,29 @@ def filter_primary_energy(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
             df = df.append({"REGION": r, "YEAR": y, "VALUE": df_f.loc[(df_f["REGION"]==r)&(df_f["YEAR"]==y),["VALUE"]].sum(axis=0).VALUE},ignore_index=True).sort_values(by=['REGION','YEAR'])
     return df[df.VALUE != 0].reset_index(drop=True)
 
+def filter_final_energy(df: pd.DataFrame, fuels: List) -> pd.DataFrame:
+    """Return dataframe that indicate the final energy demand/use per country and year.
+    """
+    for f in fuels:
+        if len(f)!=2:
+            print("Fuel %s from config.yaml doesn't comply with expected format." % f)
+            exit(1)
+
+    df['REGION'] = df['FUEL'].str[:2]
+    df['FUEL'] = df['FUEL'].str[2:]
+    df_f = pd.DataFrame(columns=['REGION','TIMESLICE','FUEL','YEAR','VALUE'])
+
+    for f in range(len(fuels)):
+        mask = df['FUEL'].str.contains(fuels[f])
+        df_t = df[mask]
+        df_f = df_f.append(df_t)
+
+    df = pd.DataFrame(columns=['REGION','YEAR','VALUE'])
+    for r in df_f['REGION'].unique():
+        for y in df_f['YEAR'].unique():
+            df = df.append({"REGION": r, "YEAR": y, "VALUE": df_f.loc[(df_f["REGION"]==r)&(df_f["YEAR"]==y),["VALUE"]].sum(axis=0).VALUE},ignore_index=True).sort_values(by=['REGION','YEAR'])
+    return df[df.VALUE != 0].reset_index(drop=True)
+
 def extract_results(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
     """Return rows which match ``technologies``
     """
