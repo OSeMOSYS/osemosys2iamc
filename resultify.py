@@ -221,6 +221,9 @@ def main(config: Dict) -> pyam.IamDataFrame:
         elif 'primary_technology' in result.keys():
             technologies = result['primary_technology']
             data = filter_primary_energy(results, technologies)
+        elif 'demand' in result.keys():
+            demands = result['demand']
+            data = filter_final_energy(results, demands)
         else:
             data = extract_results(results, technologies)
         aggregated = aggregate_results(data)
