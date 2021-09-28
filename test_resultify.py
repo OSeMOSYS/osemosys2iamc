@@ -84,6 +84,27 @@ class TestEnergy:
         index = ["REGION", "YEAR"]
 
         pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+
+    def test_filter_primary_bm(self):
+        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
+        input_data = pd.read_csv(filepath)
+
+        technologies = ['(?=^.{2}(BM))^.{4}(00)','(?=^.{2}(WS))^.{4}(00)']
+        actual = filter_primary_energy(input_data, technologies)
+
+        data = [
+            ['AT',2015,26.324108350683794],
+            ['AT',2016,26.324108350683794],
+            ['AT',2017,26.324108350683794],
+            ['AT',2018,26.324108350683787],
+            ['AT',2019,26.324108350683794],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
     
     def test_filter_final_energy(self):
         filepath = os.path.join("tests","fixtures","Demand.csv")
