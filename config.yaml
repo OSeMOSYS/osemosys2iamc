@@ -16,6 +16,11 @@ results:
 - iamc_variable: 'Primary Energy|Biomass|Electricity'
   primary_technology: ['(?=^.{2}(BM))^.{4}(00)','(?=^.{2}(WS))^.{4}(00)']
   unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Primary Energy|Coal|Electricity'
+  primary_technology: ['(?=^.{2}(CO))^.{4}(00)']
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
 - iamc_variable: 'Final Energy'
   demand: [E2]
   unit: PJ/yr
