@@ -72,11 +72,19 @@ class TestEnergy:
             ['AT', 2017, 26.324108350683794],
             ['AT', 2018, 26.324108350683787],
             ['AT', 2019, 26.324108350683794],
+            ['BE', 2016, 141.0],
+            ['BG', 2015, 1.423512],
             ['CH', 2047, 69.9750212433476],
             ['CH', 2048, 91.45662886581975],
             ['CH', 2049, 76.86770297185006],
             ['CH', 2050, 70.86078033897608],
             ['CH', 2051, 53.88447040760964],
+            ['CZ', 2015, 329.5950809],
+            ['DK', 2015, 0.0031536],
+            ['EE', 2015, 28.512108],
+            ['ES', 2015, 26.75595496],
+            ['FI', 2015, 0.296581102],
+            ['FR', 2015, 72.25974846],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
@@ -105,7 +113,165 @@ class TestEnergy:
         index = ["REGION", "YEAR"]
 
         pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+
+    def test_filter_primary_co(self):
+        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
+        input_data = pd.read_csv(filepath)
+
+        technologies = ['(?=^.{2}(CO))^.{4}(00)']
+        actual = filter_primary_energy(input_data, technologies)
+
+        data = [
+            ['CH',2047,69.9750212433476],
+            ['CH',2048,91.45662886581975],
+            ['CH',2049,76.86770297185006],
+            ['CH',2050,70.86078033897608],
+            ['CH',2051,53.88447040760964],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
     
+    def test_filter_primary_ng(self):
+        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
+        input_data = pd.read_csv(filepath)
+
+        technologies = ['(?=^.{2}(NG))^.{4}(00)']
+        actual = filter_primary_energy(input_data, technologies)
+
+        data = [
+            ['BE',2016,141.0],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+
+    def test_filter_primary_go(self):
+        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
+        input_data = pd.read_csv(filepath)
+
+        technologies = ['(?=^.{2}(GO))^.{4}(00)']
+        actual = filter_primary_energy(input_data, technologies)
+
+        data = [
+            ['BG',2015,1.423512],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+
+    def test_filter_primary_hy(self):
+        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
+        input_data = pd.read_csv(filepath)
+
+        technologies = ['^.{2}(HY)']
+        actual = filter_primary_energy(input_data, technologies)
+
+        data = [
+            ['CZ',2015,3.3637616987287244],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+
+    def test_filter_primary_nu(self):
+        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
+        input_data = pd.read_csv(filepath)
+
+        technologies = ['^.{2}(UR)']
+        actual = filter_primary_energy(input_data, technologies)
+
+        data = [
+            ['CZ',2015,326.2313192401038],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+
+    def test_filter_primary_oc(self):
+        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
+        input_data = pd.read_csv(filepath)
+
+        technologies = ['^.{2}(OC)']
+        actual = filter_primary_energy(input_data, technologies)
+
+        data = [
+            ['DK',2015,0.0031536000000000003],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+
+    def test_filter_primary_oi(self):
+        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
+        input_data = pd.read_csv(filepath)
+
+        technologies = ['(?=^.{2}(OI))^.{4}(00)','(?=^.{2}(HF))^.{4}(00)']
+        actual = filter_primary_energy(input_data, technologies)
+
+        data = [
+            ['EE',2015,28.512107999999998],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+
+    def test_filter_primary_so(self):
+        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
+        input_data = pd.read_csv(filepath)
+
+        technologies = ['^.{2}(SO)']
+        actual = filter_primary_energy(input_data, technologies)
+
+        data = [
+            ['ES',2015,26.75595496070811],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+
+    def test_filter_primary_wi(self):
+        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
+        input_data = pd.read_csv(filepath)
+
+        technologies = ['^.{2}(WI)']
+        actual = filter_primary_energy(input_data, technologies)
+
+        data = [
+            ['FI', 2015, 0.29658110158442175],
+            ['FR', 2015, 72.25974845531343]
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+
     def test_filter_final_energy(self):
         filepath = os.path.join("tests","fixtures","Demand.csv")
         input_data = pd.read_csv(filepath)
