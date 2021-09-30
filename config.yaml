@@ -5,10 +5,10 @@ results:
   emission: [CO2]
   unit: ktCO2/yr
   osemosys_param: AnnualTechnologyEmission
-- iamc_variable: "Emissions|PM2.5"
-  emission: ["**PM25"]
-  unit: ktCO2/yr
-  osemosys_param: AnnualTechnologyEmission
+#- iamc_variable: "Emissions|PM2.5"
+#  emission: ["**PM25"]
+#  unit: ktCO2/yr
+#  osemosys_param: AnnualTechnologyEmission
 - iamc_variable: 'Primary Energy'
   primary_technology: ['^.{6}(I0)','^.{6}(X0)','^.{2}(HY)','^.{2}(OC)','^.{2}(SO)','^.{2}(WI)']
   unit: PJ/yr
@@ -35,10 +35,6 @@ results:
   osemosys_param: ProductionByTechnologyAnnual
 - iamc_variable: 'Primary Energy|Nuclear'
   primary_technology: ['^.{2}(UR)']
-  unit: PJ/yr
-  osemosys_param: ProductionByTechnologyAnnual
-- iamc_variable: 'Primary Energy|Ocean'
-  primary_technology: ['^.{2}(OC)']
   unit: PJ/yr
   osemosys_param: ProductionByTechnologyAnnual
 - iamc_variable: 'Primary Energy|Ocean'
