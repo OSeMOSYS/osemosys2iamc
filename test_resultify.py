@@ -331,12 +331,157 @@ class TestCapacity:
     def test_filter_inst_capacity_bio(self):
         filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
         input_data = pd.read_csv(filepath)
-        technologies = ['(?=^.{2}(BF))^((?!00).)*$','(?=^.{2}(BM))^((?!00).)*$']
+        technologies = ['(?=^.{2}(BF))^((?!00).)*$','(?=^.{2}(BM))^((?!00).)*$', '(?=^.{2}(WS))^((?!00).)*$']
         actual = filter_capacity(input_data, technologies)
 
         data = [
             ['AT',2015,0.446776],
             ['BE',2016,0.184866],
+            ['FR', 2015, 0.47835],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+
+    def test_filter_inst_capacity_coal(self):
+        filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
+        input_data = pd.read_csv(filepath)
+        technologies = ['(?=^.{2}(CO))^((?!00).)*$']
+        actual = filter_capacity(input_data, technologies)
+
+        data = [
+            ['BG',2015,4.141],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+
+    def test_filter_inst_capacity_gas(self):
+        filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
+        input_data = pd.read_csv(filepath)
+        technologies = ['(?=^.{2}(NG))^((?!00).)*$']
+        actual = filter_capacity(input_data, technologies)
+
+        data = [
+            ['DE',2015,9.62143],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+
+    def test_filter_inst_capacity_geo(self):
+        filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
+        input_data = pd.read_csv(filepath)
+        technologies = ['(?=^.{2}(GO))^((?!00).)*$']
+        actual = filter_capacity(input_data, technologies)
+
+        data = [
+            ['CH',2026,0.004563975391582646],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+
+    def test_filter_inst_capacity_hydro(self):
+        filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
+        input_data = pd.read_csv(filepath)
+        technologies = ['^.{2}(HY)']
+        actual = filter_capacity(input_data, technologies)
+
+        data = [
+            ['CZ',2015,0.299709],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+
+    def test_filter_inst_capacity_nuclear(self):
+        filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
+        input_data = pd.read_csv(filepath)
+        technologies = ['^.{2}(NU)']
+        actual = filter_capacity(input_data, technologies)
+
+        data = [
+            ['ES',2015,7.7308],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+
+    def test_filter_inst_capacity_ocean(self):
+        filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
+        input_data = pd.read_csv(filepath)
+        technologies = ['^.{2}(OC)']
+        actual = filter_capacity(input_data, technologies)
+
+        data = [
+            ['DK',2015,0.0005],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+
+    def test_filter_inst_capacity_oil(self):
+        filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
+        input_data = pd.read_csv(filepath)
+        technologies = ['(?=^.{2}(HF))^((?!00).)*$']
+        actual = filter_capacity(input_data, technologies)
+
+        data = [
+            ['CY',2015,0.3904880555817921],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+
+    def test_filter_inst_capacity_solar(self):
+        filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
+        input_data = pd.read_csv(filepath)
+        technologies = ['^.{2}(SO)']
+        actual = filter_capacity(input_data, technologies)
+
+        data = [
+            ['EE',2015,0.006],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+
+    def test_filter_inst_capacity_wi_offshore(self):
+        filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
+        input_data = pd.read_csv(filepath)
+        technologies = ['(?=^.{2}(WI))^.{4}(OF)']
+        actual = filter_capacity(input_data, technologies)
+
+        data = [
+            ['FI',2015,0.0263],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
