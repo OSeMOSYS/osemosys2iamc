@@ -46,6 +46,22 @@ def filter_emission(df: pd.DataFrame, emission: List) -> pd.DataFrame:
 
     return df[mask]
 
+def filter_capacity(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
+    """Return rows that indicate the installed power generation capacity.
+    """
+    df['REGION'] = df['TECHNOLOGY'].str[:2]
+    df_f = pd.DataFrame(columns=['REGION','TECHNOLOGY','YEAR','VALUE'])
+    for t in range(len(technologies)):
+        mask = df['TECHNOLOGY'].str.contains(technologies[t])
+        df_t = df[mask]
+        df_f = df_f.append(df_t)
+    
+    df = pd.DataFrame(columns=["REGION","YEAR","VALUE"])
+    for r in df_f["REGION"].unique():
+        for y in df_f["YEAR"].unique():
+            df = df.append({"REGION": r, "YEAR": y, "VALUE": df_f.loc[(df_f["REGION"]==r)&(df_f["YEAR"]==y),["VALUE"]].sum(axis=0).VALUE},ignore_index=True).sort_values(by=['REGION','YEAR'])
+    return df[df.VALUE != 0].reset_index(drop=True)
+
 def filter_primary_energy(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
     """Return rows that indicate Primary Energy use/generation
     """
@@ -218,6 +234,9 @@ def main(config: Dict) -> pyam.IamDataFrame:
         elif 'emission' in result.keys():
             emission = result['emission']
             data = filter_emission(results, emission)
+        elif 'capacity' in result.keys():
+            technologies = result['capacity']
+            data = filter_capacity(results, technologies)
         elif 'primary_technology' in result.keys():
             technologies = result['primary_technology']
             data = filter_primary_energy(results, technologies)
