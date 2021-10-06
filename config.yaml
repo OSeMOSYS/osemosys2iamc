@@ -1,6 +1,10 @@
 model: OSEMBE
 scenario: Reference
 results:
+- iamc_variable: 'Capacity|Electricity'
+  capacity: ['^.{2}(BF)','^.{2}(BM)','^.{2}(CO)','^.{2}(GO)','^.{2}(HF)','^.{2}(HY)','^.{2}(NG)','^.{2}(OC)','^.{2}(SO)','^.{2}(WI)','^.{2}(WS)']
+  unit: GW
+  osemosys_param: TotalCapacityAnnual
 - iamc_variable: 'Emissions|CO2|Energy|Supply|Electricity'
   emission: [CO2]
   unit: ktCO2/yr
@@ -9,6 +13,10 @@ results:
 #  emission: ["**PM25"]
 #  unit: ktCO2/yr
 #  osemosys_param: AnnualTechnologyEmission
+- iamc_variable: 'Final Energy'
+  demand: [E2]
+  unit: PJ/yr
+  osemosys_param: Demand
 - iamc_variable: 'Primary Energy'
   primary_technology: ['^.{6}(I0)','^.{6}(X0)','^.{2}(HY)','^.{2}(OC)','^.{2}(SO)','^.{2}(WI)']
   unit: PJ/yr
@@ -53,7 +61,3 @@ results:
   primary_technology: ['^.{2}(WI)']
   unit: PJ/yr
   osemosys_param: ProductionByTechnologyAnnual
-- iamc_variable: 'Final Energy'
-  demand: [E2]
-  unit: PJ/yr
-  osemosys_param: Demand
