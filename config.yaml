@@ -2,7 +2,11 @@ model: OSEMBE
 scenario: Reference
 results:
 - iamc_variable: 'Capacity|Electricity'
-  capacity: ['^.{2}(BF)','^.{2}(BM)','^.{2}(CO)','^.{2}(GO)','^.{2}(HF)','^.{2}(HY)','^.{2}(NG)','^.{2}(OC)','^.{2}(SO)','^.{2}(WI)','^.{2}(WS)']
+  capacity: ['^((?!(EL)|(00)).)*$']
+  unit: GW
+  osemosys_param: TotalCapacityAnnual
+- iamc_variable: 'Capacity|Electricity|Biomass'
+  capacity: ['(?=^.{2}(BF))^((?!00).)*$','(?=^.{2}(BM))^((?!00).)*$']
   unit: GW
   osemosys_param: TotalCapacityAnnual
 - iamc_variable: 'Emissions|CO2|Energy|Supply|Electricity'

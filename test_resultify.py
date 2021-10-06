@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 import pytest
-from .resultify import filter_fuel, filter_emission, filter_primary_energy, filter_final_energy
+from .resultify import filter_fuel, filter_emission, filter_primary_energy, filter_final_energy, filter_capacity
 
 
 class TestEmissions:
@@ -298,3 +298,49 @@ class TestEnergy:
             filter_final_energy(input_data, fuels)
         assert pytest_wrapped_e.type == SystemExit
         assert pytest_wrapped_e.value.code == 1
+
+class TestCapacity:
+
+    def test_filter_inst_capacity(self):
+        filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
+        input_data = pd.read_csv(filepath)
+        technologies = ['^((?!(EL)|(00)).)*$']
+        actual = filter_capacity(input_data, technologies)
+
+        data = [
+            ['AT',2015,0.446776],
+            ['BE',2016,0.184866],
+            ['BG',2015,4.141],
+            ['CH',2026,0.004563975391582646],
+            ['CY',2015,0.3904880555817921],
+            ['CZ',2015,0.299709],
+            ['DE',2015,9.62143],
+            ['DK',2015,0.0005],
+            ['EE',2015,0.006],
+            ['ES',2015,7.7308],
+            ['FI',2015,0.0263],
+            ['FR',2015,0.47835],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+    
+    def test_filter_inst_capacity_bio(self):
+        filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
+        input_data = pd.read_csv(filepath)
+        technologies = ['(?=^.{2}(BF))^((?!00).)*$','(?=^.{2}(BM))^((?!00).)*$']
+        actual = filter_capacity(input_data, technologies)
+
+        data = [
+            ['AT',2015,0.446776],
+            ['BE',2016,0.184866],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
