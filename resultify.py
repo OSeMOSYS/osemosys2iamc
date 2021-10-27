@@ -163,7 +163,7 @@ def load_config(filepath: str) -> Dict:
         config = load(configfile, Loader=SafeLoader)
     return config
 
-def make_plots(df, model: str, scenario: str):
+def make_plots(df, model: str, scenario: str, regions: list):
     """Creates standard plots
 
     Arguments
@@ -176,22 +176,23 @@ def make_plots(df, model: str, scenario: str):
     print(args)
 
     # Plot primary energy
-    fig, ax = plt.subplots()
-    pe = df.filter(**args, variable='Primary Energy|*', region='World')
-    if pe:
-        pe.plot.bar(ax=ax, stacked=True, title='Primary energy mix')
-        plt.legend(loc=1)
-        plt.tight_layout()
-        fig.savefig('primary_energy.pdf', bbox_inches='tight', transparent=True, pad_inches=0)
+    for region in regions:
+        fig, ax = plt.subplots()
+        pe = df.filter(**args, variable='Primary Energy|*', region=region)
+        if pe:
+            pe.plot.bar(ax=ax, stacked=True, title='Primary energy mix %s' % region)
+            plt.legend(bbox_to_anchor=(0.,-0.25), loc='upper left')
+            plt.tight_layout()
+            fig.savefig('primary_energy_%s.pdf' % region, bbox_inches='tight', transparent=True, pad_inches=0)
 
     # Create generation capacity plot
-    fig, ax = plt.subplots()
-    cap = df.filter(**args, variable='Capacity|*', region='World')
-    if cap:
-        cap.plot.bar(ax=ax, stacked=True, title='Generation Capacity')
-        plt.legend(loc=1)
-        plt.tight_layout()
-        fig.savefig('capacity.pdf', bbox_inches='tight', transparent=True, pad_inches=0)
+        fig, ax = plt.subplots()
+        cap = df.filter(**args, variable='Capacity|Electricity|*', region=region)
+        if cap:
+            cap.plot.bar(ax=ax, stacked=True, title='Generation Capacity %s' % region)
+            plt.legend(bbox_to_anchor=(0.,-0.25),loc='upper left')
+            plt.tight_layout()
+            fig.savefig('capacity_%s.pdf' % region, bbox_inches='tight', transparent=True, pad_inches=0)
 
     # Create emissions plot
     emi = df.filter(**args, variable="Emissions|CO2*").filter(region="World", keep=False)
@@ -201,7 +202,7 @@ def make_plots(df, model: str, scenario: str):
         emi.plot.bar(ax=ax,
             bars="region", stacked=True, title="CO2 emissions by region", cmap="tab20"
             )
-        plt.legend(loc=1)
+        plt.legend(bbox_to_anchor=(1.,1.05),loc='upper left', ncol=2)
         fig.savefig('emission.pdf', bbox_inches='tight', transparent=True, pad_inches=0)
 
 
@@ -272,4 +273,5 @@ if __name__ == "__main__":
 
     model = config['model']
     scenario = config['scenario']
-    make_plots(all_data, model, scenario)
+    regions = config['region']
+    make_plots(all_data, model, scenario, regions)
