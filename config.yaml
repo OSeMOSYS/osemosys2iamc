@@ -1,6 +1,6 @@
 model: OSEMBE
-scenario: Reference
-region: ['AT','DE','ES','FR','PL','SE'] #['AT','BE','BG','CH','CY','CZ','DE','DK','EE','ES','FI','FR','GR','HR','HU','IE','IT','LT','LU','LV','MT','NL','NO','PL','PT','RO','SE','SI','SK','UK']
+scenario: DIAG-NPI
+region: ['AT','BE','BG','CH','CY','CZ','DE','DK','EE','ES','FI','FR','GR','HR','HU','IE','IT','LT','LU','LV','MT','NL','NO','PL','PT','RO','SE','SI','SK','UK']
 results:
 - iamc_variable: 'Capacity|Electricity'
   capacity: ['^((?!(EL)|(00)).)*$']
