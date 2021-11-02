@@ -13,6 +13,7 @@ where:
 """
 import pandas as pd
 import pyam
+import nomenclature as nc
 import sys
 import os
 from typing import List, Dict, Union
@@ -269,9 +270,13 @@ if __name__ == "__main__":
     config = load_config(configpath)
 
     all_data = main(config)
-    all_data.to_csv(outpath)
 
     model = config['model']
     scenario = config['scenario']
     regions = config['region']
     make_plots(all_data, model, scenario, regions)
+
+    all_data = all_data.convert_unit('PJ/yr', to='EJ/yr').timeseries()
+    all_data = pyam.IamDataFrame(all_data)
+    all_data = all_data.convert_unit('ktCO2/yr', to='Mt CO2/yr', factor=0.001).timeseries()
+    all_data.to_csv(outpath)
