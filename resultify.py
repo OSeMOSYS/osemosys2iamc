@@ -253,6 +253,12 @@ def main(config: Dict) -> pyam.IamDataFrame:
         blob.append(iamc)
 
     all_data = pyam.concat(blob)
+
+    all_data = all_data.convert_unit('PJ/yr', to='EJ/yr').timeseries()
+    all_data = pyam.IamDataFrame(all_data)
+    all_data = all_data.convert_unit('ktCO2/yr', to='Mt CO2/yr', factor=0.001).timeseries()
+    all_data.index = all_data.index.set_levels(all_data.index.levels[2].map(nc.iso_mapping), level=2)
+    all_data = pyam.IamDataFrame(all_data)
     return all_data
 
 if __name__ == "__main__":
@@ -276,7 +282,4 @@ if __name__ == "__main__":
     regions = config['region']
     make_plots(all_data, model, scenario, regions)
 
-    all_data = all_data.convert_unit('PJ/yr', to='EJ/yr').timeseries()
-    all_data = pyam.IamDataFrame(all_data)
-    all_data = all_data.convert_unit('ktCO2/yr', to='Mt CO2/yr', factor=0.001).timeseries()
     all_data.to_csv(outpath)
