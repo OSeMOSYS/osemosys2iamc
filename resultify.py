@@ -282,4 +282,4 @@ if __name__ == "__main__":
     regions = config['region']
     make_plots(all_data, model, scenario, regions)
 
-    all_data.to_csv(outpath)
+    all_data.to_excel(outpath,sheet_name='data')
