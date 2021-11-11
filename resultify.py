@@ -19,6 +19,7 @@ import os
 from typing import List, Dict, Union
 from yaml import load, SafeLoader
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 
 def read_file(filename) -> pd.DataFrame:
@@ -173,17 +174,26 @@ def make_plots(df, model: str, scenario: str, regions: list):
     scenario: str
     """
 
+    # df = all_data #for testing
+    # model = config['model'] #for testing
+    # scenario = config['scenario'] #for testing
+    # regions = config['region']#for testing
+
     args = dict(model=model, scenario=scenario)
     print(args)
 
     # Plot primary energy
     for region in regions:
         fig, ax = plt.subplots()
+        print(ax)
         pe = df.filter(**args, variable='Primary Energy|*', region=region)
         if pe:
+            locator = mdates.AutoDateLocator(minticks=10)
+            #locator.intervald['YEARLY'] = [10]
             pe.plot.bar(ax=ax, stacked=True, title='Primary energy mix %s' % region)
             plt.legend(bbox_to_anchor=(0.,-0.25), loc='upper left')
             plt.tight_layout()
+            ax.xaxis.set_major_locator(locator)
             fig.savefig('primary_energy_%s.pdf' % region, bbox_inches='tight', transparent=True, pad_inches=0)
 
     # Create generation capacity plot
