@@ -13,7 +13,7 @@ where:
 """
 import pandas as pd
 import pyam
-import nomenclature as nc
+from openentrance import iso_mapping
 import sys
 import os
 from typing import List, Dict, Union
@@ -267,7 +267,7 @@ def main(config: Dict) -> pyam.IamDataFrame:
     all_data = all_data.convert_unit('PJ/yr', to='EJ/yr').timeseries()
     all_data = pyam.IamDataFrame(all_data)
     all_data = all_data.convert_unit('ktCO2/yr', to='Mt CO2/yr', factor=0.001).timeseries()
-    all_data.index = all_data.index.set_levels(all_data.index.levels[2].map(nc.iso_mapping), level=2)
+    all_data.index = all_data.index.set_levels(all_data.index.levels[2].map(iso_mapping), level=2)
     all_data = pyam.IamDataFrame(all_data)
     return all_data
 
