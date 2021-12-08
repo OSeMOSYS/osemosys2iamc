@@ -64,7 +64,7 @@ def filter_capacity(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
             df = df.append({"REGION": r, "YEAR": y, "VALUE": df_f.loc[(df_f["REGION"]==r)&(df_f["YEAR"]==y),["VALUE"]].sum(axis=0).VALUE},ignore_index=True).sort_values(by=['REGION','YEAR'])
     return df[df.VALUE != 0].reset_index(drop=True)
 
-def filter_primary_energy(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
+def filter_ProdByTechAn(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
     """Return rows that indicate Primary Energy use/generation
     """
     df['REGION'] = df['TECHNOLOGY'].str[:2]
@@ -251,7 +251,7 @@ def main(config: Dict) -> pyam.IamDataFrame:
             data = filter_capacity(results, technologies)
         elif 'primary_technology' in result.keys():
             technologies = result['primary_technology']
-            data = filter_primary_energy(results, technologies)
+            data = filter_ProdByTechAn(results, technologies)
         elif 'demand' in result.keys():
             demands = result['demand']
             data = filter_final_energy(results, demands)

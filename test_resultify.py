@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 import pytest
-from .resultify import filter_fuel, filter_emission, filter_primary_energy, filter_final_energy, filter_capacity
+from .resultify import filter_fuel, filter_emission, filter_ProdByTechAn, filter_final_energy, filter_capacity
 
 
 class TestEmissions:
@@ -59,12 +59,12 @@ class TestFilter:
     
 class TestEnergy:
 
-    def test_filter_primary_energy(self):
+    def test_filter_ProdByTechAn(self):
         filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
         input_data = pd.read_csv(filepath)
 
         technologies = ['^.{6}(I0)','^.{6}(X0)','^.{2}(HY)','^.{2}(OC)','^.{2}(SO)','^.{2}(WI)']
-        actual = filter_primary_energy(input_data, technologies)
+        actual = filter_ProdByTechAn(input_data, technologies)
 
         data = [
             ['AT', 2015, 26.324108350683794],
@@ -98,7 +98,7 @@ class TestEnergy:
         input_data = pd.read_csv(filepath)
 
         technologies = ['(?=^.{2}(BM))^.{4}(00)','(?=^.{2}(WS))^.{4}(00)']
-        actual = filter_primary_energy(input_data, technologies)
+        actual = filter_ProdByTechAn(input_data, technologies)
 
         data = [
             ['AT',2015,26.324108350683794],
@@ -119,7 +119,7 @@ class TestEnergy:
         input_data = pd.read_csv(filepath)
 
         technologies = ['(?=^.{2}(CO))^.{4}(00)']
-        actual = filter_primary_energy(input_data, technologies)
+        actual = filter_ProdByTechAn(input_data, technologies)
 
         data = [
             ['CH',2047,69.9750212433476],
@@ -140,7 +140,7 @@ class TestEnergy:
         input_data = pd.read_csv(filepath)
 
         technologies = ['(?=^.{2}(NG))^.{4}(00)']
-        actual = filter_primary_energy(input_data, technologies)
+        actual = filter_ProdByTechAn(input_data, technologies)
 
         data = [
             ['BE',2016,141.0],
@@ -157,7 +157,7 @@ class TestEnergy:
         input_data = pd.read_csv(filepath)
 
         technologies = ['(?=^.{2}(GO))^.{4}(00)']
-        actual = filter_primary_energy(input_data, technologies)
+        actual = filter_ProdByTechAn(input_data, technologies)
 
         data = [
             ['BG',2015,1.423512],
@@ -174,7 +174,7 @@ class TestEnergy:
         input_data = pd.read_csv(filepath)
 
         technologies = ['^.{2}(HY)']
-        actual = filter_primary_energy(input_data, technologies)
+        actual = filter_ProdByTechAn(input_data, technologies)
 
         data = [
             ['CZ',2015,3.3637616987287244],
@@ -191,7 +191,7 @@ class TestEnergy:
         input_data = pd.read_csv(filepath)
 
         technologies = ['^.{2}(UR)']
-        actual = filter_primary_energy(input_data, technologies)
+        actual = filter_ProdByTechAn(input_data, technologies)
 
         data = [
             ['CZ',2015,326.2313192401038],
@@ -208,7 +208,7 @@ class TestEnergy:
         input_data = pd.read_csv(filepath)
 
         technologies = ['^.{2}(OC)']
-        actual = filter_primary_energy(input_data, technologies)
+        actual = filter_ProdByTechAn(input_data, technologies)
 
         data = [
             ['DK',2015,0.0031536000000000003],
@@ -225,7 +225,7 @@ class TestEnergy:
         input_data = pd.read_csv(filepath)
 
         technologies = ['(?=^.{2}(OI))^.{4}(00)','(?=^.{2}(HF))^.{4}(00)']
-        actual = filter_primary_energy(input_data, technologies)
+        actual = filter_ProdByTechAn(input_data, technologies)
 
         data = [
             ['EE',2015,28.512107999999998],
@@ -242,7 +242,7 @@ class TestEnergy:
         input_data = pd.read_csv(filepath)
 
         technologies = ['^.{2}(SO)']
-        actual = filter_primary_energy(input_data, technologies)
+        actual = filter_ProdByTechAn(input_data, technologies)
 
         data = [
             ['ES',2015,26.75595496070811],
@@ -259,7 +259,7 @@ class TestEnergy:
         input_data = pd.read_csv(filepath)
 
         technologies = ['^.{2}(WI)']
-        actual = filter_primary_energy(input_data, technologies)
+        actual = filter_ProdByTechAn(input_data, technologies)
 
         data = [
             ['FI', 2015, 0.29658110158442175],
