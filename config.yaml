@@ -1,5 +1,5 @@
-model: OSEMBE
-scenario: DIAG-NPI
+model: OSeMBE v1.0.0
+scenario: DIAG-C400-lin-ResidualFossil
 region: ['Austria', 'Belgium', 'Bulgaria', 'Switzerland', 'Cyprus', 'Czech Republic', 'Germany', 'Denmark', 'Estonia', 'Spain', 'Finland', 'France', 'Greece', 'Croatia', 'Hungary', 'Ireland', 'Italy', 'Lithuania', 'Luxembourg', 'Latvia', 'Malta', 'The Netherlands', 'Norway', 'Poland', 'Portugal', 'Romania', 'Sweden', 'Slovenia', 'Slovakia', 'United Kingdom',]
 results:
 - iamc_variable: 'Capacity|Electricity'
@@ -58,7 +58,7 @@ results:
 #  emission: ["**PM25"]
 #  unit: ktCO2/yr
 #  osemosys_param: AnnualTechnologyEmission
-- iamc_variable: 'Final Energy'
+- iamc_variable: 'Final Energy|Electricity'
   demand: [E2]
   unit: PJ/yr
   osemosys_param: Demand
