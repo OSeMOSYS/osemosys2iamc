@@ -110,12 +110,36 @@ results:
   el_prod_technology: ['(?=^.{2}(BF))^((?!00).)*$','(?=^.{2}(BM))^((?!00).)*$', '(?=^.{2}(WS))^((?!00).)*$']
   unit: PJ/yr
   osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Secondary Energy|Electricity|Biomass|w/ CCS'
+  el_prod_technology: ['(?=^.{2}(BM))^.{4}(CS)']
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Secondary Energy|Electricity|Biomass|w/o CCS'
+  el_prod_technology: ['(?=^.{2}(BF))^((?!00).)*$','(?=^.{2}(BM))^((?!(00)|(CS)).)*$', '(?=^.{2}(WS))^((?!00).)*$']
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
 - iamc_variable: 'Secondary Energy|Electricity|Coal'
   el_prod_technology: ['(?=^.{2}(CO))^((?!00).)*$']
   unit: PJ/yr
   osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Secondary Energy|Electricity|Coal|w/ CCS'
+  el_prod_technology: ['(?=^.{2}(CO))^.{4}(CS)']
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Secondary Energy|Electricity|Coal|w/o CCS'
+  el_prod_technology: ['(?=^.{2}(CO))^((?!(00)|(CS)).)*$']
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
 - iamc_variable: 'Secondary Energy|Electricity|Gas'
   el_prod_technology: ['(?=^.{2}(NG))^((?!00).)*$']
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Secondary Energy|Electricity|Gas|w/ CCS'
+  el_prod_technology: ['(?=^.{2}(NG))^.{4}(CS)']
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Secondary Energy|Electricity|Gas|w/o CCS'
+  el_prod_technology: ['(?=^.{2}(NG))^((?!(00)|(CS)).)*$']
   unit: PJ/yr
   osemosys_param: ProductionByTechnologyAnnual
 - iamc_variable: 'Secondary Energy|Electricity|Geothermal'
@@ -138,11 +162,27 @@ results:
   el_prod_technology: ['(?=^.{2}(HF))^((?!00).)*$']
   unit: PJ/yr
   osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Secondary Energy|Electricity|Oil|w/ CCS'
+  el_prod_technology: ['(?=^.{2}(HF))^.{4}(CS)']
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Secondary Energy|Electricity|Oil|w/o CCS'
+  el_prod_technology: ['(?=^.{2}(HF))^((?!(00)|(CS)).)*$']
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
 - iamc_variable: 'Secondary Energy|Electricity|Solar|PV'
   el_prod_technology: ['^.{2}(SO)']
   unit: PJ/yr
   osemosys_param: ProductionByTechnologyAnnual
 - iamc_variable: 'Secondary Energy|Electricity|Wind'
   el_prod_technology: ['^.{2}(WI)']
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Secondary Energy|Electricity|Wind|Offshore'
+  el_prod_technology: ['(?=^.{2}(WI))^.{4}(OF)']
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Secondary Energy|Electricity|Wind|Onshore'
+  el_prod_technology: ['(?=^.{2}(WI))^.{4}(ON)']
   unit: PJ/yr
   osemosys_param: ProductionByTechnologyAnnual

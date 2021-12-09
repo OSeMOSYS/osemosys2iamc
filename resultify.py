@@ -200,8 +200,8 @@ def make_plots(df, model: str, scenario: str, regions: list):
     # Plot secondary energy (electricity generation)
         fig, ax = plt.subplots()
         print(ax)
-        pe = df.filter(**args, variable='Secondary Energy|Electricity|*', region=region)
-        if pe:
+        se = df.filter(**args, variable='Secondary Energy|Electricity|*', region=region)
+        if se:
             locator = mdates.AutoDateLocator(minticks=10)
             #locator.intervald['YEARLY'] = [10]
             pe.plot.bar(ax=ax, stacked=True, title='Power generation mix %s' % region)
@@ -276,8 +276,9 @@ def main(config: Dict) -> pyam.IamDataFrame:
             data = extract_results(results, technologies)
         aggregated = aggregate_results(data)
 
-        iamc = make_iamc(aggregated, config['model'], config['scenario'], result['iamc_variable'], unit)
-        blob.append(iamc)
+        if not aggregated.empty:
+            iamc = make_iamc(aggregated, config['model'], config['scenario'], result['iamc_variable'], unit)
+            blob.append(iamc)
 
     all_data = pyam.concat(blob)
 
