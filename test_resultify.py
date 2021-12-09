@@ -272,6 +272,27 @@ class TestEnergy:
 
         pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
 
+    def test_filter_secondary_bm(self):
+        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
+        input_data = pd.read_csv(filepath)
+
+        technologies = ['(?=^.{2}(BF))^((?!00).)*$','(?=^.{2}(BM))^((?!00).)*$', '(?=^.{2}(WS))^((?!00).)*$']
+        actual = filter_ProdByTechAn(input_data, technologies)
+
+        data = [
+            ['AT', 2042, 0.6636346353894057],
+            ['AT', 2043, 1.3300518531620575],
+            ['AT', 2044, 1.9992691432067637],
+            ['AT', 2045, 2.6713041901899794],
+            ['AT', 2046, 3.4778527409137996]
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+
     def test_filter_final_energy(self):
         filepath = os.path.join("tests","fixtures","Demand.csv")
         input_data = pd.read_csv(filepath)

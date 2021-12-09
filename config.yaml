@@ -1,6 +1,6 @@
 model: OSeMBE v1.0.0
 scenario: DIAG-C400-lin-ResidualFossil
-region: ['Austria', 'Belgium', 'Bulgaria', 'Switzerland', 'Cyprus', 'Czech Republic', 'Germany', 'Denmark', 'Estonia', 'Spain', 'Finland', 'France', 'Greece', 'Croatia', 'Hungary', 'Ireland', 'Italy', 'Lithuania', 'Luxembourg', 'Latvia', 'Malta', 'The Netherlands', 'Norway', 'Poland', 'Portugal', 'Romania', 'Sweden', 'Slovenia', 'Slovakia', 'United Kingdom',]
+region: ['Austria'] #, 'Belgium', 'Bulgaria', 'Switzerland', 'Cyprus', 'Czech Republic', 'Germany', 'Denmark', 'Estonia', 'Spain', 'Finland', 'France', 'Greece', 'Croatia', 'Hungary', 'Ireland', 'Italy', 'Lithuania', 'Luxembourg', 'Latvia', 'Malta', 'The Netherlands', 'Norway', 'Poland', 'Portugal', 'Romania', 'Sweden', 'Slovenia', 'Slovakia', 'United Kingdom',]
 results:
 - iamc_variable: 'Capacity|Electricity'
   capacity: ['^((?!(EL)|(00)).)*$']
@@ -104,5 +104,45 @@ results:
   osemosys_param: ProductionByTechnologyAnnual
 - iamc_variable: 'Primary Energy|Wind'
   primary_technology: ['^.{2}(WI)']
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Secondary Energy|Electricity|Biomass'
+  el_prod_technology: ['(?=^.{2}(BF))^((?!00).)*$','(?=^.{2}(BM))^((?!00).)*$', '(?=^.{2}(WS))^((?!00).)*$']
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Secondary Energy|Electricity|Coal'
+  el_prod_technology: ['(?=^.{2}(CO))^((?!00).)*$']
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Secondary Energy|Electricity|Gas'
+  el_prod_technology: ['(?=^.{2}(NG))^((?!00).)*$']
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Secondary Energy|Electricity|Geothermal'
+  el_prod_technology: ['(?=^.{2}(GO))^((?!00).)*$']
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Secondary Energy|Electricity|Hydro'
+  el_prod_technology: ['^.{2}(HY)']
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Secondary Energy|Electricity|Nuclear'
+  el_prod_technology: ['^.{2}(NU)']
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Secondary Energy|Electricity|Ocean'
+  el_prod_technology: ['^.{2}(OC)']
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Secondary Energy|Electricity|Oil'
+  el_prod_technology: ['(?=^.{2}(HF))^((?!00).)*$']
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Secondary Energy|Electricity|Solar|PV'
+  el_prod_technology: ['^.{2}(SO)']
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Secondary Energy|Electricity|Wind'
+  el_prod_technology: ['^.{2}(WI)']
   unit: PJ/yr
   osemosys_param: ProductionByTechnologyAnnual
