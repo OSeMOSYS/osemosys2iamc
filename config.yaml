@@ -62,6 +62,10 @@ results:
   demand: [E2]
   unit: PJ/yr
   osemosys_param: Demand
+- iamc_variable: 'Price|Primary Energy|Biomass'
+  variable_cost:
+  unit: M€/PJ
+  osemosys_param: 'VariableCost'
 - iamc_variable: 'Primary Energy'
   primary_technology: ['^.{6}(I0)','^.{6}(X0)','^.{2}(HY)','^.{2}(OC)','^.{2}(SO)','^.{2}(WI)']
   unit: PJ/yr
