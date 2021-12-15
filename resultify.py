@@ -266,6 +266,9 @@ def main(config: Dict) -> pyam.IamDataFrame:
         elif 'primary_technology' in result.keys():
             technologies = result['primary_technology']
             data = filter_ProdByTechAn(results, technologies)
+        elif 'excluded_prod_tech' in result.keys():
+            technologies = result['excluded_prod_tech']
+            data = filter_ProdByTechAn(results, technologies)
         elif 'el_prod_technology' in result.keys():
             technologies = result['el_prod_technology']
             data = filter_ProdByTechAn(results, technologies)

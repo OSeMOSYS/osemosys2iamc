@@ -106,6 +106,10 @@ results:
   primary_technology: ['^.{2}(WI)']
   unit: PJ/yr
   osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Secondary Energy|Electricity'
+  excluded_prod_tech: ['^((?!(00)|(EL)|(RF)).)*$']
+  unit: PJ/yr
+  osemosys_param: ProductionByTechnologyAnnual
 - iamc_variable: 'Secondary Energy|Electricity|Biomass'
   el_prod_technology: ['(?=^.{2}(BF))^((?!00).)*$','(?=^.{2}(BM))^((?!00).)*$', '(?=^.{2}(WS))^((?!00).)*$']
   unit: PJ/yr
