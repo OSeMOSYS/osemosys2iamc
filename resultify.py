@@ -123,7 +123,7 @@ def extract_results(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
 
     return df[mask]
 
-def aggregate_results(data: pd.DataFrame):
+def aggregate(data: pd.DataFrame):
     """Sums rows while grouping regions and years
     """
 
@@ -256,6 +256,22 @@ def main(config: Dict) -> pyam.IamDataFrame:
         The configuration dictionary
     """
     blob = []
+    for input in config['inputs']:
+
+        inpathname = os.path.join(inputs_path, input['osemosys_param'] + '.csv')
+        inputs = read_file(inpathname)
+
+        unit = input['unit']
+
+        technologies = input['variable_cost']
+        data = filter_var_cost(inputs, technologies)
+
+        aggregated = aggregate(data)
+
+        if not aggregated.empty:
+            iamc = make_iamc(aggregated, config['model'], config['scenario'], input['iamc_variable'], unit)
+            blob.append(iamc)
+
     for result in config['results']:
 
         inpathname = os.path.join(results_path, result['osemosys_param'] + '.csv')
@@ -289,7 +305,7 @@ def main(config: Dict) -> pyam.IamDataFrame:
             data = filter_final_energy(results, demands)
         else:
             data = extract_results(results, technologies)
-        aggregated = aggregate_results(data)
+        aggregated = aggregate(data)
 
         if not aggregated.empty:
             iamc = make_iamc(aggregated, config['model'], config['scenario'], result['iamc_variable'], unit)
@@ -308,13 +324,14 @@ if __name__ == "__main__":
 
     args = sys.argv[1:]
 
-    if len(args) != 3:
-        print("Usage: python resultify.py <results_path> <config_path> <output_path>")
+    if len(args) != 4:
+        print("Usage: python resultify.py <inputs_path> <results_path> <config_path> <output_path>")
         exit(1)
 
-    results_path = args[0]
-    configpath = args[1]
-    outpath = args[2]
+    inputs_path = args[0]
+    results_path = args[1]
+    configpath = args[2]
+    outpath = args[3]
 
     config = load_config(configpath)
 
