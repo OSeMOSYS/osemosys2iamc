@@ -28,6 +28,18 @@ def read_file(filename) -> pd.DataFrame:
 
     return df
 
+def filter_var_cost(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
+    """Return rows that match the ``technologies``
+    """
+    mask = df['TECHNOLOGY'].str.contains(technologies[0])
+
+    df['REGION'] = df['TECHNOLOGY'].str[0:2]
+    df = df.drop(columns=['TECHNOLOGY', 'MODE_OF_OPERATION'])
+
+    df = df[mask]
+
+    return df[df.VALUE != 0]
+
 def filter_fuel(df: pd.DataFrame, technologies: List, fuels: List) -> pd.DataFrame:
     """Return rows which match ``technologies`` and ``fuels``
     """

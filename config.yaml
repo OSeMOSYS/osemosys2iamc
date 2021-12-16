@@ -63,7 +63,7 @@ results:
   unit: PJ/yr
   osemosys_param: Demand
 - iamc_variable: 'Price|Primary Energy|Biomass'
-  variable_cost:
+  variable_cost: ['(?=^.{2}(BM))^.{6}(X0)']
   unit: M€/PJ
   osemosys_param: 'VariableCost'
 - iamc_variable: 'Primary Energy'

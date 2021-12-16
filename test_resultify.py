@@ -1,7 +1,8 @@
+from datetime import date
 import pandas as pd
 import os
 import pytest
-from .resultify import filter_fuel, filter_emission, filter_ProdByTechAn, filter_final_energy, filter_capacity
+from .resultify import extract_results, filter_var_cost, filter_fuel, filter_emission, filter_ProdByTechAn, filter_final_energy, filter_capacity
 
 
 class TestEmissions:
@@ -503,6 +504,27 @@ class TestCapacity:
 
         data = [
             ['FI',2015,0.0263],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
+
+        index = ["REGION", "YEAR"]
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+
+class TestPrice:
+    
+    def test_price_bm(self):
+        filepath = os.path.join("tests","fixtures","VariableCost.csv")
+        input_data = pd.read_csv(filepath)
+        commodity = ['(?=^.{2}(BM))^.{6}(X0)']
+        actual = filter_var_cost(input_data, commodity)
+
+        data = [
+            ['AT',2015,2.327755063],
+            ['AT',2016,2.327755063],
+            ['BE',2015,2.327755063],
+            ['BE',2016,2.327755063],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
