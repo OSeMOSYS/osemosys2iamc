@@ -60,6 +60,27 @@ def filter_emission(df: pd.DataFrame, emission: List) -> pd.DataFrame:
 
     return df[mask]
 
+def filter_emission_tech(df: pd.DataFrame, tech: List, emission: List) -> pd.DataFrame:
+    """Return a dataframe with annual emissions or captured emissions by one or several technologies.
+    """
+
+    mask_emi = df.EMISSION.isin(emission)
+    df = df[mask_emi]
+
+    df_f = pd.DataFrame(columns=['REGION','TECHNOLOGY','EMISSION','YEAR','VALUE'])
+
+    for t in range(len(tech)):
+        mask_tech = df['TECHNOLOGY'].str.contains(tech[t])
+        df_t = df[mask_tech]
+        df_f = df_f.append(df_t)
+
+    df_f['REGION'] = df_f['TECHNOLOGY'].str[:2]
+    df = df_f.drop(columns='TECHNOLOGY')
+
+    df['VALUE'] = df['VALUE']*(-1)
+
+    return df
+
 def filter_capacity(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
     """Return rows that indicate the installed power generation capacity.
     """
@@ -288,6 +309,10 @@ def main(config: Dict) -> pyam.IamDataFrame:
         elif 'emission' in result.keys():
             emission = result['emission']
             data = filter_emission(results, emission)
+        elif 'tech_emi' in result.keys():
+            emission = result['emissions']
+            technologies = result['tech_emi']
+            data = filter_emission_tech(results, technologies, emission)
         elif 'capacity' in result.keys():
             technologies = result['capacity']
             data = filter_capacity(results, technologies)
@@ -316,6 +341,8 @@ def main(config: Dict) -> pyam.IamDataFrame:
     all_data = all_data.convert_unit('PJ/yr', to='EJ/yr').timeseries()
     all_data = pyam.IamDataFrame(all_data)
     all_data = all_data.convert_unit('ktCO2/yr', to='Mt CO2/yr', factor=0.001).timeseries()
+    all_data = pyam.IamDataFrame(all_data)
+    all_data = all_data.convert_unit('kt CO2/yr', to='Mt CO2/yr').timeseries()
     all_data.index = all_data.index.set_levels(all_data.index.levels[2].map(iso_mapping), level=2)
     all_data = pyam.IamDataFrame(all_data)
     return all_data

@@ -2,7 +2,7 @@ from datetime import date
 import pandas as pd
 import os
 import pytest
-from .resultify import extract_results, filter_var_cost, filter_fuel, filter_emission, filter_ProdByTechAn, filter_final_energy, filter_capacity
+from .resultify import extract_results, filter_var_cost, filter_fuel, filter_emission, filter_emission_tech, filter_ProdByTechAn, filter_final_energy, filter_capacity
 
 
 class TestEmissions:
@@ -28,6 +28,28 @@ class TestEmissions:
             ["BG", 'CO2', 2030, 11096.55693088164],
             ["BG", 'CO2', 2031, 11069.257140908643],
             ["BG", 'CO2', 2032, 11041.957354265856],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=['REGION', 'EMISSION', 'YEAR', 'VALUE'])
+
+        index = ['REGION', 'EMISSION', 'YEAR']
+
+        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+    
+    def test_filter_tech_emission(self):
+
+        filepath = os.path.join("tests", 'fixtures', "AnnualTechnologyEmissions.csv")
+        input_data = pd.read_csv(filepath)
+
+        tech = ['(?=^.{2}(BM))^.{4}(CS)']
+        emission = ['CO2']
+        actual = filter_emission_tech(input_data, tech, emission)
+
+        data = [
+            ['AT', 'CO2', 2026, 7573.069442598169],
+            ['AT', 'CO2', 2027, 7766.777427515737],
+            ['BE', 'CO2', 2026, 2244.98280006968],
+            ['BE', 'CO2', 2027, 6746.886436926597],
         ]
 
         expected = pd.DataFrame(data=data, columns=['REGION', 'EMISSION', 'YEAR', 'VALUE'])
