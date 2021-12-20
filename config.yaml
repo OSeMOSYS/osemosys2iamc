@@ -67,6 +67,11 @@ results:
   capacity: ['(?=^.{2}(WI))^.{4}(ON)']
   unit: GW
   osemosys_param: TotalCapacityAnnual
+- iamc_variable: 'Carbon Capture|Biomass'
+  tech_emi: ['(?=^.{2}(BM))^.{4}(CS)']
+  emissions: [CO2]
+  unit: kt
+  osemosys_param: AnnualTechnologyEmission
 - iamc_variable: 'Emissions|CO2|Energy|Supply|Electricity'
   emission: [CO2]
   unit: ktCO2/yr
