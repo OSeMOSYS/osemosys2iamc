@@ -72,6 +72,11 @@ results:
   emissions: [CO2]
   unit: kt CO2/yr
   osemosys_param: AnnualTechnologyEmission
+- iamc_variable: 'Carbon Capture|Fossil'
+  tech_emi: ['(?=^.{2}(CO))^.{4}(CS)','(?=^.{2}(NG))^.{4}(CS)']
+  emissions: [CO2]
+  unit: kt CO2/yr
+  osemosys_param: AnnualTechnologyEmission
 - iamc_variable: 'Emissions|CO2|Energy|Supply|Electricity'
   emission: [CO2]
   unit: ktCO2/yr
