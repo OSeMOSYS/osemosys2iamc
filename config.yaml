@@ -217,3 +217,7 @@ results:
   el_prod_technology: ['(?=^.{2}(WI))^.{4}(ON)']
   unit: PJ/yr
   osemosys_param: ProductionByTechnologyAnnual
+- iamc_variable: 'Trade|Secondary Energy|Electricity|Volume'
+  trade_tech: ['(?=^.{2}(EL))^((?!00).)*$']
+  unit : PJ/yr
+  osemosys_param: [UseByTechnology, ProductionByTechnologyAnnual]

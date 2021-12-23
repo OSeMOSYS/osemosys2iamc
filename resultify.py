@@ -136,6 +136,52 @@ def filter_final_energy(df: pd.DataFrame, fuels: List) -> pd.DataFrame:
             df = df.append({"REGION": r, "YEAR": y, "VALUE": df_f.loc[(df_f["REGION"]==r)&(df_f["YEAR"]==y),["VALUE"]].sum(axis=0).VALUE},ignore_index=True).sort_values(by=['REGION','YEAR'])
     return df[df.VALUE != 0].reset_index(drop=True)
 
+def calculate_trade(results: dict, techs: List) -> pd.DataFrame:
+    """Return dataframe with the net exports of a commodity
+    """
+
+    countries = pd.Series(dtype='object')
+    years = pd.Series()
+    for p in results:
+        df = results[p]
+        df_f = pd.DataFrame(columns=df.columns)
+        for t in techs:
+            mask = df['TECHNOLOGY'].str.contains(t)
+            df_t = df[mask]
+            df_f = df_f.append(df_t)
+
+        df_f['REGION'] = df_f['FUEL'].str[:2]
+        df_f = df_f.drop(columns='FUEL')
+        df_f = df_f.groupby(by=['REGION', 'YEAR']).sum()
+        df_f = df_f.reset_index(level=['REGION', 'YEAR'])
+
+        countries = countries.append(df_f.loc[:,'REGION'])
+        years = years.append(df_f.loc[:,'YEAR'])
+        results[p] = df_f
+    
+    countries = countries.unique()
+    years = years.unique()
+    exports = results['UseByTechnology']
+    imports = results['ProductionByTechnologyAnnual']
+
+    df = pd.DataFrame(columns=['REGION','YEAR','VALUE'])
+    for country in countries:
+        for year in years:
+            if not exports[(exports['REGION']==country)&(exports['YEAR']==year)].empty:
+                if not imports[(imports['REGION']==country)&(imports['YEAR']==year)].empty:
+                    value = exports[(exports['REGION']==country)&(exports['YEAR']==year)].iloc[0]['VALUE']-imports[(imports['REGION']==country)&(imports['YEAR']==year)].iloc[0]['VALUE']
+                    df = df.append({'REGION': country, 'YEAR': year, 'VALUE': value}, ignore_index=True)
+                else:
+                    value = exports[(exports['REGION']==country)&(exports['YEAR']==year)].iloc[0]['VALUE']
+                    df = df.append({'REGION': country, 'YEAR': year, 'VALUE': value}, ignore_index=True)
+            else:
+                if not imports[(imports['REGION']==country)&(imports['YEAR']==year)].empty:
+                    value = -imports[(imports['REGION']==country)&(imports['YEAR']==year)].iloc[0]['VALUE']
+                    df = df.append({'REGION': country, 'YEAR': year, 'VALUE': value}, ignore_index=True)
+
+
+    return df
+
 def extract_results(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
     """Return rows which match ``technologies``
     """
@@ -295,41 +341,52 @@ def main(config: Dict) -> pyam.IamDataFrame:
 
     for result in config['results']:
 
-        inpathname = os.path.join(results_path, result['osemosys_param'] + '.csv')
-        results = read_file(inpathname)
+        if type(result['osemosys_param']) == str:
+            inpathname = os.path.join(results_path, result['osemosys_param'] + '.csv')
+            results = read_file(inpathname)
 
-        try:
-            technologies = result['technology']
-        except KeyError:
-            pass
-        unit = result['unit']
-        if 'fuel' in result.keys():
-            fuels = result['fuel']
-            data = filter_fuel(results, technologies, fuels)
-        elif 'emission' in result.keys():
-            emission = result['emission']
-            data = filter_emission(results, emission)
-        elif 'tech_emi' in result.keys():
-            emission = result['emissions']
-            technologies = result['tech_emi']
-            data = filter_emission_tech(results, technologies, emission)
-        elif 'capacity' in result.keys():
-            technologies = result['capacity']
-            data = filter_capacity(results, technologies)
-        elif 'primary_technology' in result.keys():
-            technologies = result['primary_technology']
-            data = filter_ProdByTechAn(results, technologies)
-        elif 'excluded_prod_tech' in result.keys():
-            technologies = result['excluded_prod_tech']
-            data = filter_ProdByTechAn(results, technologies)
-        elif 'el_prod_technology' in result.keys():
-            technologies = result['el_prod_technology']
-            data = filter_ProdByTechAn(results, technologies)
-        elif 'demand' in result.keys():
-            demands = result['demand']
-            data = filter_final_energy(results, demands)
+            try:
+                technologies = result['technology']
+            except KeyError:
+                pass
+            unit = result['unit']
+            if 'fuel' in result.keys():
+                fuels = result['fuel']
+                data = filter_fuel(results, technologies, fuels)
+            elif 'emission' in result.keys():
+                emission = result['emission']
+                data = filter_emission(results, emission)
+            elif 'tech_emi' in result.keys():
+                emission = result['emissions']
+                technologies = result['tech_emi']
+                data = filter_emission_tech(results, technologies, emission)
+            elif 'capacity' in result.keys():
+                technologies = result['capacity']
+                data = filter_capacity(results, technologies)
+            elif 'primary_technology' in result.keys():
+                technologies = result['primary_technology']
+                data = filter_ProdByTechAn(results, technologies)
+            elif 'excluded_prod_tech' in result.keys():
+                technologies = result['excluded_prod_tech']
+                data = filter_ProdByTechAn(results, technologies)
+            elif 'el_prod_technology' in result.keys():
+                technologies = result['el_prod_technology']
+                data = filter_ProdByTechAn(results, technologies)
+            elif 'demand' in result.keys():
+                demands = result['demand']
+                data = filter_final_energy(results, demands)
+            else:
+                data = extract_results(results, technologies)
+
         else:
-            data = extract_results(results, technologies)
+            results = {}
+            for p in result['osemosys_param']:
+                inpathname = os.path.join(results_path, p + '.csv')
+                results[p] = read_file(inpathname)
+            if 'trade_tech' in result.keys():
+                technologies = result['trade_tech']
+                data = calculate_trade(results, technologies)
+
         aggregated = aggregate(data)
 
         if not aggregated.empty:
