@@ -4,19 +4,19 @@ region: ['Austria'] #, 'Belgium', 'Bulgaria', 'Switzerland', 'Cyprus', 'Czech Re
 inputs:
 - iamc_variable: 'Price|Primary Energy|Biomass'
   variable_cost: ['(?=^.{2}(BM))^.{6}(X0)']
-  unit: M€/PJ
+  unit: MEUR_2015/PJ
   osemosys_param: 'VariableCost'
 - iamc_variable: 'Price|Primary Energy|Coal'
   variable_cost: ['(?=^.{2}(CO))^.{6}(X0)']
-  unit: M€/PJ
+  unit: MEUR_2015/PJ
   osemosys_param: 'VariableCost'
 - iamc_variable: 'Price|Primary Energy|Gas'
   variable_cost: ['(?=^.{2}(NG))^.{6}(X0)']
-  unit: M€/PJ
+  unit: MEUR_2015/PJ
   osemosys_param: 'VariableCost'
 - iamc_variable: 'Price|Primary Energy|Oil'
   variable_cost: ['(?=^.{2}(OI))^.{6}(X0)']
-  unit: M€/PJ
+  unit: MEUR_2015/PJ
   osemosys_param: 'VariableCost'
 results:
 - iamc_variable: 'Capacity|Electricity'

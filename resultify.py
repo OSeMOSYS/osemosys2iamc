@@ -399,7 +399,7 @@ def main(config: Dict) -> pyam.IamDataFrame:
     all_data = pyam.IamDataFrame(all_data)
     all_data = all_data.convert_unit('ktCO2/yr', to='Mt CO2/yr', factor=0.001).timeseries()
     all_data = pyam.IamDataFrame(all_data)
-    all_data = all_data.convert_unit('M€/PJ', to='EUR_2020/GJ', factor=1.05).timeseries()
+    all_data = all_data.convert_unit('MEUR_2015/PJ', to='EUR_2020/GJ', factor=1.05).timeseries()
     all_data = pyam.IamDataFrame(all_data)
     all_data = all_data.convert_unit('kt CO2/yr', to='Mt CO2/yr').timeseries()
     all_data.index = all_data.index.set_levels(all_data.index.levels[2].map(iso_mapping), level=2)
