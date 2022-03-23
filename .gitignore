@@ -13,6 +13,7 @@ __pycache__/*
 .*.swp
 */.ipynb_checkpoints/*
 .DS_Store
+.ipynb_checkpoints/
 
 # Project files
 .ropeproject
@@ -52,3 +53,7 @@ MANIFEST
 
 # Plots
 *.pdf
+
+# Outputs
+*.csv
+!tests/fixtures/*.csv

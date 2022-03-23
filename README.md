@@ -6,7 +6,7 @@ Convert OSeMOSYS results to IAMC format
 
     python resultify.py results config.yaml  test.csv
 
-Check out the IAMC formatted results in `test.csv`
+Check out the IAMC formatted results in `test.csv` and plots `emissions.csv`
 
 ## IAMC Variables
 
@@ -49,8 +49,8 @@ Final Energy|Industry|Solids|Coal
 Final Energy|Residential and Commercial|Solids|Coal
 Final Energy|Other Sector|Solids|Coal
 
-Level | Commodity | Sector | Sector
----|---|---|---
+Level | Commodity | Sector | Sector | Sector
+---|---|---|---|---
 Emissions|CO2|Energy and Industrial Processes
 Emissions|CO2|Energy|Supply
 Emissions|CO2|Energy|Supply|Electricity
