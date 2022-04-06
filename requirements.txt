@@ -1,5 +1,4 @@
 matplotlib
 pandas
 pyam
-yaml
--e git+git@github.com:openENTRANCE/openentrance.git#egg=openentrance
+-e git+https://github.com/openENTRANCE/openentrance.git@main#egg=openentrance
