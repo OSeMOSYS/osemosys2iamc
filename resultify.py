@@ -2,10 +2,11 @@
 
 Run the command::
 
-    python resultify.py <results_path> <config_path> <output_path>"
+    python resultify.py <input_path> <results_path> <config_path> <output_path>"
 
 where:
 
+    ``input_path`` is the path to the folder of CSV files containing input files
     ``results_path`` is the path to the folder of CSV files holding OSeMOSYS results
     ``config_path`` is the path to the ``config.yaml`` file containing the results mapping
     ``output_path`` is the path to the csv file written out in IAMC format
@@ -90,7 +91,7 @@ def filter_capacity(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
         mask = df['TECHNOLOGY'].str.contains(technologies[t])
         df_t = df[mask]
         df_f = df_f.append(df_t)
-    
+
     df = pd.DataFrame(columns=["REGION","YEAR","VALUE"])
     for r in df_f["REGION"].unique():
         for y in df_f["YEAR"].unique():
@@ -106,7 +107,7 @@ def filter_ProdByTechAn(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
         mask = df['TECHNOLOGY'].str.contains(technologies[t])
         df_t = df[mask]
         df_f = df_f.append(df_t)
-    
+
     df = pd.DataFrame(columns=["REGION","YEAR","VALUE"])
     for r in df_f["REGION"].unique():
         for y in df_f["YEAR"].unique():
@@ -158,7 +159,7 @@ def calculate_trade(results: dict, techs: List) -> pd.DataFrame:
         countries = countries.append(df_f.loc[:,'REGION'])
         years = years.append(df_f.loc[:,'YEAR'])
         results[p] = df_f
-    
+
     countries = countries.unique()
     years = years.unique()
     exports = results['UseByTechnology']
@@ -311,7 +312,7 @@ def make_plots(df, model: str, scenario: str, regions: list):
 
 
 
-def main(config: Dict) -> pyam.IamDataFrame:
+def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame:
     """Create the IAM data frame from results
 
     Loops over each entry in the configuration file, extracts the data from
@@ -421,11 +422,11 @@ if __name__ == "__main__":
 
     config = load_config(configpath)
 
-    all_data = main(config)
+    all_data = main(config, inputs_path, results_path)
 
     model = config['model']
     scenario = config['scenario']
     regions = config['region']
     make_plots(all_data, model, scenario, regions)
 
-    all_data.to_excel(outpath,sheet_name='data')
+    all_data.to_excel(outpath, sheet_name='data')
