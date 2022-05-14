@@ -6,6 +6,8 @@ from pyam.testing import assert_iamframe_equal
 from .resultify import extract_results, filter_var_cost, filter_fuel, filter_emission, filter_emission_tech, filter_ProdByTechAn, filter_final_energy, filter_capacity
 
 
+SCENARIO_ARGS = dict(model="foo", scenario="bar")
+DATA_COLS = ["REGION", "VARIABLE", "YEAR", "VALUE"]
 class TestEmissions:
 
     def test_filter_emission(self):
@@ -14,7 +16,8 @@ class TestEmissions:
         input_data = pd.read_csv(filepath)
 
         emission = ['CO2']
-        obs = IamDataFrame(filter_emission(input_data, emission))
+
+        obs = IamDataFrame(filter_emission(input_data, emission), **SCENARIO_ARGS, variable="EMISSION", unit="?")
 
         data = [
             ['AT', 'CO2', 2026, -7573.069442598169],
@@ -32,7 +35,7 @@ class TestEmissions:
         ]
 
         exp = IamDataFrame(
-            pd.DataFrame(data=data, columns=['REGION', 'EMISSION', 'YEAR', 'VALUE'])
+            pd.DataFrame(data=data, columns=DATA_COLS), unit="?", **SCENARIO_ARGS,
         )
 
         assert_iamframe_equal(obs, exp)
