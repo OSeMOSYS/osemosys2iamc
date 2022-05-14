@@ -1,7 +1,8 @@
-from datetime import date
 import pandas as pd
 import os
 import pytest
+from pyam import IamDataFrame
+from pyam.testing import assert_iamframe_equal
 from .resultify import extract_results, filter_var_cost, filter_fuel, filter_emission, filter_emission_tech, filter_ProdByTechAn, filter_final_energy, filter_capacity
 
 
@@ -13,7 +14,7 @@ class TestEmissions:
         input_data = pd.read_csv(filepath)
 
         emission = ['CO2']
-        actual = filter_emission(input_data, emission)
+        obs = IamDataFrame(filter_emission(input_data, emission))
 
         data = [
             ['AT', 'CO2', 2026, -7573.069442598169],
@@ -30,11 +31,11 @@ class TestEmissions:
             ["BG", 'CO2', 2032, 11041.957354265856],
         ]
 
-        expected = pd.DataFrame(data=data, columns=['REGION', 'EMISSION', 'YEAR', 'VALUE'])
+        exp = IamDataFrame(
+            pd.DataFrame(data=data, columns=['REGION', 'EMISSION', 'YEAR', 'VALUE'])
+        )
 
-        index = ['REGION', 'EMISSION', 'YEAR']
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        assert_iamframe_equal(obs, exp)
     
     def test_filter_tech_emission(self):
 
