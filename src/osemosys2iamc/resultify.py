@@ -49,19 +49,6 @@ def filter_fuel(df: pd.DataFrame, technologies: List, fuels: List) -> pd.DataFra
 
     return df[mask & fuel_mask]
 
-def filter_emission(df: pd.DataFrame, emission: List) -> pd.DataFrame:
-    """Return rows which match ``emission`` and fill region name from technology
-    """
-
-    # Find rows which match the list of emission codes provided
-    mask = df.EMISSION.isin(emission)
-
-    # First two characters in technology match ISO2 country name
-    df['REGION'] = df['TECHNOLOGY'].str[0:2]
-    df = df.drop(columns='TECHNOLOGY')
-
-    return df[mask]
-
 def filter_emission_tech(df: pd.DataFrame, emission: List[str], tech: Optional[List[str]]=None) -> pd.DataFrame:
     """Return annual emissions or captured emissions by one or several technologies.
 
@@ -201,12 +188,6 @@ def extract_results(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
     mask = df.TECHNOLOGY.isin(technologies)
 
     return df[mask]
-
-def aggregate(data: pd.DataFrame):
-    """Sums rows while grouping regions and years
-    """
-
-    return data.groupby(by=['REGION', 'YEAR']).sum()
 
 def make_iamc(data: pd.DataFrame,
               iam_model: str,

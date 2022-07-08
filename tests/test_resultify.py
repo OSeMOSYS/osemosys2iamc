@@ -2,7 +2,7 @@ from datetime import date
 import pandas as pd
 import os
 import pytest
-from osemosys2iamc.resultify import extract_results, filter_var_cost, filter_fuel, filter_emission, filter_emission_tech, filter_ProdByTechAn, filter_final_energy, filter_capacity
+from osemosys2iamc.resultify import filter_var_cost, filter_fuel, filter_emission_tech, filter_ProdByTechAn, filter_final_energy, filter_capacity
 
 
 class TestEmissions:
