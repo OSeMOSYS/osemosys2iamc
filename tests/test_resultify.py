@@ -13,7 +13,7 @@ class TestEmissions:
         input_data = pd.read_csv(filepath)
 
         emission = ['CO2']
-        actual = filter_emission(input_data, emission)
+        actual = filter_emission_tech(input_data, emission)
 
         data = [
             ['AT', 'CO2', 2026, -7573.069442598169],
@@ -43,13 +43,13 @@ class TestEmissions:
 
         tech = ['(?=^.{2}(BM))^.{4}(CS)']
         emission = ['CO2']
-        actual = filter_emission_tech(input_data, tech, emission)
+        actual = filter_emission_tech(input_data, emission, tech)
 
         data = [
-            ['AT', 'CO2', 2026, 7573.069442598169],
-            ['AT', 'CO2', 2027, 7766.777427515737],
-            ['BE', 'CO2', 2026, 2244.98280006968],
-            ['BE', 'CO2', 2027, 6746.886436926597],
+            ['AT', 'CO2', 2026, -7573.069442598169],
+            ['AT', 'CO2', 2027, -7766.777427515737],
+            ['BE', 'CO2', 2026, -2244.98280006968],
+            ['BE', 'CO2', 2027, -6746.886436926597],
         ]
 
         expected = pd.DataFrame(data=data, columns=['REGION', 'EMISSION', 'YEAR', 'VALUE'])

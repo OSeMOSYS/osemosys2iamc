@@ -17,7 +17,7 @@ import pyam
 from openentrance import iso_mapping
 import sys
 import os
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Optional
 from yaml import load, SafeLoader
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -53,6 +53,7 @@ def filter_emission(df: pd.DataFrame, emission: List) -> pd.DataFrame:
     """Return rows which match ``emission`` and fill region name from technology
     """
 
+    # Find rows which match the list of emission codes provided
     mask = df.EMISSION.isin(emission)
 
     # First two characters in technology match ISO2 country name
@@ -61,8 +62,20 @@ def filter_emission(df: pd.DataFrame, emission: List) -> pd.DataFrame:
 
     return df[mask]
 
-def filter_emission_tech(df: pd.DataFrame, tech: List, emission: List) -> pd.DataFrame:
-    """Return a dataframe with annual emissions or captured emissions by one or several technologies.
+def filter_emission_tech(df: pd.DataFrame, emission: List[str], tech: Optional[List[str]]=None) -> pd.DataFrame:
+    """Return annual emissions or captured emissions by one or several technologies.
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+    emission: List[str]
+        List of regex patterns
+    tech: List[str], default=None
+        List of regex patterns
+
+    Returns
+    -------
+    pandas.DataFrame
     """
 
     mask_emi = df.EMISSION.isin(emission)
@@ -70,15 +83,13 @@ def filter_emission_tech(df: pd.DataFrame, tech: List, emission: List) -> pd.Dat
 
     df_f = pd.DataFrame(columns=['REGION','TECHNOLOGY','EMISSION','YEAR','VALUE'])
 
-    for t in range(len(tech)):
-        mask_tech = df['TECHNOLOGY'].str.contains(tech[t])
-        df_t = df[mask_tech]
-        df_f = df_f.append(df_t)
+    if tech:
+    # Create a list of masks, one for each row that matches the pattern listed in ``tech``
+        masks = [df['TECHNOLOGY'].str.contains(t) for t in tech]
+        df = pd.concat([df[mask] for mask in masks])
 
-    df_f['REGION'] = df_f['TECHNOLOGY'].str[:2]
-    df = df_f.drop(columns='TECHNOLOGY')
-
-    df['VALUE'] = df['VALUE']*(-1)
+    df['REGION'] = df['TECHNOLOGY'].str[:2]
+    df = df.drop(columns='TECHNOLOGY')
 
     return df
 
@@ -350,11 +361,11 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
                 data = filter_fuel(results, technologies, fuels)
             elif 'emission' in result.keys():
                 emission = result['emission']
-                data = filter_emission(results, emission)
+                data = filter_emission_tech(results, emission)
             elif 'tech_emi' in result.keys():
                 emission = result['emissions']
                 technologies = result['tech_emi']
-                data = filter_emission_tech(results, technologies, emission)
+                data = filter_emission_tech(results, emission, technologies)
             elif 'capacity' in result.keys():
                 technologies = result['capacity']
                 data = filter_capacity(results, technologies)
@@ -382,7 +393,8 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
                 technologies = result['trade_tech']
                 data = calculate_trade(results, technologies)
 
-        aggregated = aggregate(data)
+        # Sum over all columns that are not in REGION or YEAR
+        aggregated = data.groupby(by=['REGION', 'YEAR']).sum()
 
         if not aggregated.empty:
             iamc = make_iamc(aggregated, config['model'], config['scenario'], result['iamc_variable'], unit)
@@ -390,13 +402,10 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
 
     all_data = pyam.concat(blob)
 
-    all_data = all_data.convert_unit('PJ/yr', to='EJ/yr').timeseries()
-    all_data = pyam.IamDataFrame(all_data)
-    all_data = all_data.convert_unit('ktCO2/yr', to='Mt CO2/yr', factor=0.001).timeseries()
-    all_data = pyam.IamDataFrame(all_data)
-    all_data = all_data.convert_unit('MEUR_2015/PJ', to='EUR_2020/GJ', factor=1.05).timeseries()
-    all_data = pyam.IamDataFrame(all_data)
-    all_data = all_data.convert_unit('kt CO2/yr', to='Mt CO2/yr').timeseries()
+    all_data = all_data.convert_unit('PJ/yr', to='EJ/yr')
+    all_data = all_data.convert_unit('ktCO2/yr', to='Mt CO2/yr', factor=0.001)
+    all_data = all_data.convert_unit('MEUR_2015/PJ', to='EUR_2020/GJ', factor=1.05)
+    all_data = all_data.convert_unit('kt CO2/yr', to='Mt CO2/yr')
     all_data.index = all_data.index.set_levels(all_data.index.levels[2].map(iso_mapping), level=2)
     all_data = pyam.IamDataFrame(all_data)
     return all_data
