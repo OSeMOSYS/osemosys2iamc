@@ -30,28 +30,11 @@ def read_file(filename) -> pd.DataFrame:
 
     return df
 
-def filter_var_cost(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
-    """Return rows that match the ``technologies``
-    """
-    mask = df['TECHNOLOGY'].str.contains(technologies[0])
-
-    df['REGION'] = df['TECHNOLOGY'].str[0:2]
-    df = df.drop(columns=['TECHNOLOGY', 'MODE_OF_OPERATION'])
-
-    df = df[mask]
-
-    return df[df.VALUE != 0]
-
-def filter_fuel(df: pd.DataFrame, technologies: List, fuels: List) -> pd.DataFrame:
-    """Return rows which match ``technologies`` and ``fuels``
-    """
-    mask = df.TECHNOLOGY.isin(technologies)
-    fuel_mask = df.FUEL.isin(fuels)
-
-    return df[mask & fuel_mask]
-
 def filter_regex(df: pd.DataFrame, patterns: List[str], column: str) -> pd.DataFrame:
     """Generic filtering of rows based on columns that match a list of patterns
+
+    This function returns the rows where the values in a ``column`` match the
+    list of regular expression ``patterns``
     """
     masks = [df[column].str.contains(p) for p in patterns]
     return pd.concat([df[mask] for mask in masks])
@@ -80,6 +63,15 @@ def filter_technologies(df: pd.DataFrame, technologies: List[str]) -> pd.DataFra
     """
     return filter_regex(df, technologies, 'TECHNOLOGY')
 
+def filter_fuel(df: pd.DataFrame, technologies: List, fuels: List) -> pd.DataFrame:
+    """Return rows which match ``technologies`` and ``fuels``
+    """
+    df = filter_technologies(df, technologies)
+    df = filter_fuels(df, fuels)
+
+    df = df.groupby(by=['REGION','YEAR']).sum()
+    return df[df.VALUE != 0]
+
 def filter_emission_tech(df: pd.DataFrame, emission: List[str], technologies: Optional[List[str]]=None) -> pd.DataFrame:
     """Return annual emissions or captured emissions by one or several technologies.
 
@@ -96,22 +88,20 @@ def filter_emission_tech(df: pd.DataFrame, emission: List[str], technologies: Op
     pandas.DataFrame
     """
 
-    mask_emi = df.EMISSION.isin(emission)
-    df = df[mask_emi]
-
-    df_f = pd.DataFrame(columns=['REGION','TECHNOLOGY','EMISSION','YEAR','VALUE'])
+    df['REGION'] = df['TECHNOLOGY'].str[:2]
+    df = filter_regex(df, emission, 'EMISSION')
 
     if technologies:
     # Create a list of masks, one for each row that matches the pattern listed in ``tech``
         df = filter_technologies(df, technologies)
 
-    df['REGION'] = df['TECHNOLOGY'].str[:2]
-    df = df.drop(columns='TECHNOLOGY')
+    df = df.groupby(by=['REGION', 'EMISSION','YEAR']).sum()
 
-    return df
+    return df[df.VALUE != 0]
 
 def filter_capacity(df: pd.DataFrame, technologies: List[str]) -> pd.DataFrame:
-    """Return rows that indicate the installed power generation capacity.
+    """Return aggregated rows filtered on technology column.
+
 
     Parameters
     ----------
@@ -119,27 +109,16 @@ def filter_capacity(df: pd.DataFrame, technologies: List[str]) -> pd.DataFrame:
         The input data
     technologies: List[str]
         List of regex patterns
+
+    Returns
+    -------
+    pandas.DataFrame
     """
     df['REGION'] = df['TECHNOLOGY'].str[:2]
     df_f = filter_technologies(df, technologies)
 
-    df = pd.DataFrame(columns=["REGION","YEAR","VALUE"])
-    for r in df_f["REGION"].unique():
-        for y in df_f["YEAR"].unique():
-            df = df.append({"REGION": r, "YEAR": y, "VALUE": df_f.loc[(df_f["REGION"]==r)&(df_f["YEAR"]==y),["VALUE"]].sum(axis=0).VALUE},ignore_index=True).sort_values(by=['REGION','YEAR'])
-    return df[df.VALUE != 0].reset_index(drop=True)
-
-def filter_ProdByTechAn(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
-    """Return rows that indicate Primary Energy use/generation
-    """
-    df['REGION'] = df['TECHNOLOGY'].str[:2]
-    df_f = filter_technologies(df, technologies)
-
-    df = pd.DataFrame(columns=["REGION","YEAR","VALUE"])
-    for r in df_f["REGION"].unique():
-        for y in df_f["YEAR"].unique():
-            df = df.append({"REGION": r, "YEAR": y, "VALUE": df_f.loc[(df_f["REGION"]==r)&(df_f["YEAR"]==y),["VALUE"]].sum(axis=0).VALUE},ignore_index=True).sort_values(by=['REGION','YEAR'])
-    return df[df.VALUE != 0].reset_index(drop=True)
+    df = df_f.groupby(by=["REGION", 'YEAR']).sum()
+    return df[df.VALUE != 0]
 
 def filter_final_energy(df: pd.DataFrame, fuels: List) -> pd.DataFrame:
     """Return dataframe that indicate the final energy demand/use per country and year.
@@ -151,15 +130,10 @@ def filter_final_energy(df: pd.DataFrame, fuels: List) -> pd.DataFrame:
 
     df['REGION'] = df['FUEL'].str[:2]
     df['FUEL'] = df['FUEL'].str[2:]
-    df_f = pd.DataFrame(columns=['REGION','TIMESLICE','FUEL','YEAR','VALUE'])
-
     df_f = filter_fuels(df, fuels)
 
-    df = pd.DataFrame(columns=['REGION','YEAR','VALUE'])
-    for r in df_f['REGION'].unique():
-        for y in df_f['YEAR'].unique():
-            df = df.append({"REGION": r, "YEAR": y, "VALUE": df_f.loc[(df_f["REGION"]==r)&(df_f["YEAR"]==y),["VALUE"]].sum(axis=0).VALUE},ignore_index=True).sort_values(by=['REGION','YEAR'])
-    return df[df.VALUE != 0].reset_index(drop=True)
+    df = df_f.groupby(by=['REGION', 'YEAR']).sum()
+    return df[df.VALUE != 0]
 
 def calculate_trade(results: dict, techs: List) -> pd.DataFrame:
     """Return dataframe with the net exports of a commodity
@@ -340,12 +314,10 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
         unit = input['unit']
 
         technologies = input['variable_cost']
-        data = filter_var_cost(inputs, technologies)
-
-        aggregated = aggregate(data)
+        data = filter_capacity(inputs, technologies)
 
         if not aggregated.empty:
-            iamc = make_iamc(aggregated, config['model'], config['scenario'], input['iamc_variable'], unit)
+            iamc = make_iamc(data, config['model'], config['scenario'], input['iamc_variable'], unit)
             blob.append(iamc)
 
     for result in config['results']:
@@ -374,13 +346,13 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
                 data = filter_capacity(results, technologies)
             elif 'primary_technology' in result.keys():
                 technologies = result['primary_technology']
-                data = filter_ProdByTechAn(results, technologies)
+                data = filter_capacity(results, technologies)
             elif 'excluded_prod_tech' in result.keys():
                 technologies = result['excluded_prod_tech']
-                data = filter_ProdByTechAn(results, technologies)
+                data = filter_capacity(results, technologies)
             elif 'el_prod_technology' in result.keys():
                 technologies = result['el_prod_technology']
-                data = filter_ProdByTechAn(results, technologies)
+                data = filter_capacity(results, technologies)
             elif 'demand' in result.keys():
                 demands = result['demand']
                 data = filter_final_energy(results, demands)
