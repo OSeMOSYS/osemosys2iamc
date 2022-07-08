@@ -1,4 +1,3 @@
 matplotlib
 pandas
 pyam-iamc >= 1.0  # the pyam package is released on pypi under this name
--e git+https://github.com/openENTRANCE/openentrance.git@main#egg=openentrance
