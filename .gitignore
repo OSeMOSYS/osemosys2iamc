@@ -13,7 +13,6 @@ __pycache__/*
 .*.swp
 */.ipynb_checkpoints/*
 .DS_Store
-.ipynb_checkpoints/
 
 # Project files
 .ropeproject
@@ -21,8 +20,8 @@ __pycache__/*
 .pydevproject
 .settings
 .idea
-tags
 .vscode
+tags
 
 # Package files
 *.egg
@@ -33,8 +32,9 @@ tags
 # Unittest and coverage
 htmlcov/*
 .coverage
+.coverage.*
 .tox
-junit.xml
+junit*.xml
 coverage.xml
 .pytest_cache/
 
@@ -50,6 +50,8 @@ MANIFEST
 
 # Per-project virtualenvs
 .venv*/
+.conda*/
+.python-version
 
 # Plots
 *.pdf

@@ -2,9 +2,13 @@
 
 Convert OSeMOSYS results to IAMC format
 
+## Install from Github repository
+
+    pip install git+https://github.com/osesmosys/osemosys2iamc@main#egg=osemosys2iamc
+
 ## Run the demo
 
-    python resultify.py results config.yaml  test.csv
+    osemosys2iamc results config.yaml  test.csv
 
 Check out the IAMC formatted results in `test.csv` and plots `emissions.csv`
 
