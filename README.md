@@ -8,9 +8,25 @@ Convert OSeMOSYS results to IAMC format
 
 Check out the IAMC formatted results in `test.csv` and plots `emissions.csv`
 
-## IAMC Variables
+## The IAMC format
 
-IAMC variables can be found [here](https://data.ene.iiasa.ac.at/iamc-1.5c-explorer/#/docs)
+The IAMC format was developed by the [Integrated Assessment Modeling Consortium (IAMC)](https://www.iamconsortium.org/)
+and is used in many model comparison projects at the global and national level.
+It can be used for integrated-assessment models, energy-systems scenarios
+and analysis of specific sectors like transport, industry or buildings.
+
+The format is a tabular structure with the columns *model*, *scenario*, *region*,
+*variable*, *unit*, and a time domain. Each project defines "codelists"
+to be used across modelling teams for comparison and analysis of results.
+
+The most recent high-profile application of the IAMC format is the [AR6 Scenario Explorer](https://data.ece.iiasa.ac.at/ar6)
+hosting the scenario ensemble supporting the quantitative assessment
+in the contribution by Working Group III to the IPCC's Sixth Assessment Report (AR6).
+
+Please refer to the Horizon 2020 project [openENTRANCE](https://github.com/openENTRANCE/openentrance#data-format-structure)
+for more information about the format and its usage in that project.
+
+## Usage for OSeMOSYS
 
 ### Primary Energy
 
