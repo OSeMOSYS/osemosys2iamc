@@ -22,7 +22,7 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.os }} py${{ matrix.python-version }}
-  
+
     steps:
     - uses: actions/checkout@v2
 
@@ -32,10 +32,10 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install pytest
-      run: pip install pytest
+      run: pip install pytest pytest-cov
 
-    - name: Install dependencies
-      run: pip install -r requirements.txt
+    - name: Install the package
+      run: pip install .
 
     - name: Test with pytest
-      run: pytest .
+      run: pytest
