@@ -401,7 +401,7 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
     all_data = pyam.IamDataFrame(all_data)
     return all_data
 
-if __name__ == "__main__":
+def entry_point():
 
     args = sys.argv[1:]
 
@@ -424,3 +424,8 @@ if __name__ == "__main__":
     make_plots(all_data, model, scenario, regions)
 
     all_data.to_excel(outpath, sheet_name='data')
+
+
+if __name__ == "__main__":
+
+    entry_point()

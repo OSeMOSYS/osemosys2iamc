@@ -2,7 +2,7 @@ from datetime import date
 import pandas as pd
 import os
 import pytest
-from .resultify import extract_results, filter_var_cost, filter_fuel, filter_emission, filter_emission_tech, filter_ProdByTechAn, filter_final_energy, filter_capacity
+from osemosys2iamc.resultify import extract_results, filter_var_cost, filter_fuel, filter_emission, filter_emission_tech, filter_ProdByTechAn, filter_final_energy, filter_capacity
 
 
 class TestEmissions:
@@ -35,7 +35,7 @@ class TestEmissions:
         index = ['REGION', 'EMISSION', 'YEAR']
 
         pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
-    
+
     def test_filter_tech_emission(self):
 
         filepath = os.path.join("tests", 'fixtures', "AnnualTechnologyEmissions.csv")
@@ -85,7 +85,7 @@ class TestFilter:
         index = ['REGION', 'TIMESLICE', 'TECHNOLOGY', 'FUEL', 'YEAR']
 
         pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
-    
+
 class TestEnergy:
 
     def test_filter_ProdByTechAn(self):
@@ -163,7 +163,7 @@ class TestEnergy:
         index = ["REGION", "YEAR"]
 
         pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
-    
+
     def test_filter_primary_ng(self):
         filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
         input_data = pd.read_csv(filepath)
@@ -377,7 +377,7 @@ class TestCapacity:
         index = ["REGION", "YEAR"]
 
         pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
-    
+
     def test_filter_inst_capacity_bio(self):
         filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
         input_data = pd.read_csv(filepath)
@@ -541,7 +541,7 @@ class TestCapacity:
         pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
 
 class TestPrice:
-    
+
     def test_price_bm(self):
         filepath = os.path.join("tests","fixtures","VariableCost.csv")
         input_data = pd.read_csv(filepath)
