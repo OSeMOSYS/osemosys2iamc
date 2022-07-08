@@ -12,6 +12,7 @@ where:
     ``output_path`` is the path to the csv file written out in IAMC format
 
 """
+import functools
 import pandas as pd
 import pyam
 from openentrance import iso_mapping
@@ -49,7 +50,37 @@ def filter_fuel(df: pd.DataFrame, technologies: List, fuels: List) -> pd.DataFra
 
     return df[mask & fuel_mask]
 
-def filter_emission_tech(df: pd.DataFrame, emission: List[str], tech: Optional[List[str]]=None) -> pd.DataFrame:
+def filter_regex(df: pd.DataFrame, patterns: List[str], column: str) -> pd.DataFrame:
+    """Generic filtering of rows based on columns that match a list of patterns
+    """
+    masks = [df[column].str.contains(p) for p in patterns]
+    return pd.concat([df[mask] for mask in masks])
+
+def filter_fuels(df: pd.DataFrame, fuels: List[str]) -> pd.DataFrame:
+    """Returns rows which match list of regex patterns in ``technologies``
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        The input data
+    fuels: List[str]
+        List of regex patterns
+    """
+    return filter_regex(df, fuels, 'FUEL')
+
+def filter_technologies(df: pd.DataFrame, technologies: List[str]) -> pd.DataFrame:
+    """Returns rows which match list of regex patterns in ``technologies``
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        The input data
+    technologies: List[str]
+        List of regex patterns
+    """
+    return filter_regex(df, technologies, 'TECHNOLOGY')
+
+def filter_emission_tech(df: pd.DataFrame, emission: List[str], technologies: Optional[List[str]]=None) -> pd.DataFrame:
     """Return annual emissions or captured emissions by one or several technologies.
 
     Parameters
@@ -57,7 +88,7 @@ def filter_emission_tech(df: pd.DataFrame, emission: List[str], tech: Optional[L
     df: pd.DataFrame
     emission: List[str]
         List of regex patterns
-    tech: List[str], default=None
+    technologies: List[str], default=None
         List of regex patterns
 
     Returns
@@ -70,25 +101,27 @@ def filter_emission_tech(df: pd.DataFrame, emission: List[str], tech: Optional[L
 
     df_f = pd.DataFrame(columns=['REGION','TECHNOLOGY','EMISSION','YEAR','VALUE'])
 
-    if tech:
+    if technologies:
     # Create a list of masks, one for each row that matches the pattern listed in ``tech``
-        masks = [df['TECHNOLOGY'].str.contains(t) for t in tech]
-        df = pd.concat([df[mask] for mask in masks])
+        df = filter_technologies(df, technologies)
 
     df['REGION'] = df['TECHNOLOGY'].str[:2]
     df = df.drop(columns='TECHNOLOGY')
 
     return df
 
-def filter_capacity(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
+def filter_capacity(df: pd.DataFrame, technologies: List[str]) -> pd.DataFrame:
     """Return rows that indicate the installed power generation capacity.
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        The input data
+    technologies: List[str]
+        List of regex patterns
     """
     df['REGION'] = df['TECHNOLOGY'].str[:2]
-    df_f = pd.DataFrame(columns=['REGION','TECHNOLOGY','YEAR','VALUE'])
-    for t in range(len(technologies)):
-        mask = df['TECHNOLOGY'].str.contains(technologies[t])
-        df_t = df[mask]
-        df_f = df_f.append(df_t)
+    df_f = filter_technologies(df, technologies)
 
     df = pd.DataFrame(columns=["REGION","YEAR","VALUE"])
     for r in df_f["REGION"].unique():
@@ -100,11 +133,7 @@ def filter_ProdByTechAn(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
     """Return rows that indicate Primary Energy use/generation
     """
     df['REGION'] = df['TECHNOLOGY'].str[:2]
-    df_f = pd.DataFrame(columns=['REGION','TECHNOLOGY','FUEL','YEAR','VALUE'])
-    for t in range(len(technologies)):
-        mask = df['TECHNOLOGY'].str.contains(technologies[t])
-        df_t = df[mask]
-        df_f = df_f.append(df_t)
+    df_f = filter_technologies(df, technologies)
 
     df = pd.DataFrame(columns=["REGION","YEAR","VALUE"])
     for r in df_f["REGION"].unique():
@@ -124,10 +153,7 @@ def filter_final_energy(df: pd.DataFrame, fuels: List) -> pd.DataFrame:
     df['FUEL'] = df['FUEL'].str[2:]
     df_f = pd.DataFrame(columns=['REGION','TIMESLICE','FUEL','YEAR','VALUE'])
 
-    for f in range(len(fuels)):
-        mask = df['FUEL'].str.contains(fuels[f])
-        df_t = df[mask]
-        df_f = df_f.append(df_t)
+    df_f = filter_fuels(df, fuels)
 
     df = pd.DataFrame(columns=['REGION','YEAR','VALUE'])
     for r in df_f['REGION'].unique():
@@ -143,11 +169,7 @@ def calculate_trade(results: dict, techs: List) -> pd.DataFrame:
     years = pd.Series()
     for p in results:
         df = results[p]
-        df_f = pd.DataFrame(columns=df.columns)
-        for t in techs:
-            mask = df['TECHNOLOGY'].str.contains(t)
-            df_t = df[mask]
-            df_f = df_f.append(df_t)
+        df_f = filter_technologies(techs)
 
         df_f['REGION'] = df_f['FUEL'].str[:2]
         df_f = df_f.drop(columns='FUEL')
@@ -329,8 +351,8 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
     for result in config['results']:
 
         if type(result['osemosys_param']) == str:
-            inpathname = os.path.join(results_path, result['osemosys_param'] + '.csv')
-            results = read_file(inpathname)
+            path_name = os.path.join(results_path, result['osemosys_param'] + '.csv')
+            results = read_file(path_name)
 
             try:
                 technologies = result['technology']
@@ -368,8 +390,8 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
         else:
             results = {}
             for p in result['osemosys_param']:
-                inpathname = os.path.join(results_path, p + '.csv')
-                results[p] = read_file(inpathname)
+                path_name = os.path.join(results_path, p + '.csv')
+                results[p] = read_file(path_name)
             if 'trade_tech' in result.keys():
                 technologies = result['trade_tech']
                 data = calculate_trade(results, technologies)
@@ -390,6 +412,25 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
     all_data.index = all_data.index.set_levels(all_data.index.levels[2].map(iso_mapping), level=2)
     all_data = pyam.IamDataFrame(all_data)
     return all_data
+
+def aggregate(func):
+    """Decorator for filters which returns the aggregated data
+
+    """
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        # Get the dataframe from the filter
+        data = func(*args, **kwargs)
+        # Apply the aggregation
+        data = data.groupby(by=['REGION', 'YEAR']).sum()
+        # Make the IAMDataFrame
+        return pyam.IamDataFrame(
+            data,
+            model=iam_model,
+            scenario=iam_scenario,
+            variable=iam_variable,
+            unit=iam_unit)
+    return wrapper
 
 def entry_point():
 
