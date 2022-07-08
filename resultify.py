@@ -219,19 +219,13 @@ def make_iamc(data: pd.DataFrame,
         The unit to insert into the IAMC dataframe
 
     """
-    data = data.reset_index()
-    data = data.rename(columns={
-        'REGION': 'region',
-        'YEAR': 'year'
-    })
-    # Add required columns
-    data['model'] = iam_model
-    data['scenario'] = iam_scenario
-    data['variable'] = iam_variable
-    data['unit'] = iam_unit
-
-    iamc = pyam.IamDataFrame(data)
-    return iamc
+    return pyam.IamDataFrame(
+        data,
+        model=iam_model,
+        scenario=iam_scenario,
+        variable=iam_variable,
+        unit=iam_unit,
+    )
 
 def load_config(filepath: str) -> Dict:
     """Reads the configuration file
