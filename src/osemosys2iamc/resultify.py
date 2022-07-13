@@ -36,7 +36,7 @@ def filter_regex(df: pd.DataFrame, patterns: List[str], column: str) -> pd.DataF
     This function returns the rows where the values in a ``column`` match the
     list of regular expression ``patterns``
     """
-    masks = [df[column].str.contains(p) for p in patterns]
+    masks = [df[column].str.contains(p, regex=True) for p in patterns]
     return pd.concat([df[mask] for mask in masks])
 
 def filter_fuels(df: pd.DataFrame, fuels: List[str]) -> pd.DataFrame:
@@ -69,7 +69,7 @@ def filter_fuel(df: pd.DataFrame, technologies: List, fuels: List) -> pd.DataFra
     df = filter_technologies(df, technologies)
     df = filter_fuels(df, fuels)
 
-    df = df.groupby(by=['REGION','YEAR']).sum()
+    df = df.groupby(by=['REGION','YEAR'], as_index=False)["VALUE"].sum()
     return df[df.VALUE != 0]
 
 def filter_emission_tech(df: pd.DataFrame, emission: List[str], technologies: Optional[List[str]]=None) -> pd.DataFrame:
@@ -95,8 +95,7 @@ def filter_emission_tech(df: pd.DataFrame, emission: List[str], technologies: Op
     # Create a list of masks, one for each row that matches the pattern listed in ``tech``
         df = filter_technologies(df, technologies)
 
-    df = df.groupby(by=['REGION', 'EMISSION','YEAR']).sum()
-
+    df = df.groupby(by=['REGION','YEAR'], as_index=False)["VALUE"].sum()
     return df[df.VALUE != 0]
 
 def filter_capacity(df: pd.DataFrame, technologies: List[str]) -> pd.DataFrame:
@@ -115,9 +114,9 @@ def filter_capacity(df: pd.DataFrame, technologies: List[str]) -> pd.DataFrame:
     pandas.DataFrame
     """
     df['REGION'] = df['TECHNOLOGY'].str[:2]
-    df_f = filter_technologies(df, technologies)
+    df = filter_technologies(df, technologies)
 
-    df = df_f.groupby(by=["REGION", 'YEAR']).sum()
+    df = df.groupby(by=['REGION','YEAR'], as_index=False)["VALUE"].sum()
     return df[df.VALUE != 0]
 
 def filter_final_energy(df: pd.DataFrame, fuels: List) -> pd.DataFrame:
@@ -132,7 +131,7 @@ def filter_final_energy(df: pd.DataFrame, fuels: List) -> pd.DataFrame:
     df['FUEL'] = df['FUEL'].str[2:]
     df_f = filter_fuels(df, fuels)
 
-    df = df_f.groupby(by=['REGION', 'YEAR']).sum()
+    df = df_f.groupby(by=['REGION','YEAR'], as_index=False)["VALUE"].sum()
     return df[df.VALUE != 0]
 
 def calculate_trade(results: dict, techs: List) -> pd.DataFrame:
@@ -185,35 +184,6 @@ def extract_results(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
 
     return df[mask]
 
-def make_iamc(data: pd.DataFrame,
-              iam_model: str,
-              iam_scenario: str,
-              iam_variable: str,
-              iam_unit: str
-              ) -> pyam.IamDataFrame:
-    """Creates an IAM Dataframe from raw data
-
-    Arguments
-    ---------
-    data: pd.DataFrame
-        Contains columns for region, year and value
-    iam_model: str
-        The model name to insert into the IAMC dataframe
-    iam_scenario: str
-        The scenario name to insert into the IAMC dataframe
-    iam_variable: str
-        The IAMC variable name to insert into the IAMC dataframe
-    iam_unit: str
-        The unit to insert into the IAMC dataframe
-
-    """
-    return pyam.IamDataFrame(
-        data,
-        model=iam_model,
-        scenario=iam_scenario,
-        variable=iam_variable,
-        unit=iam_unit,
-    )
 
 def load_config(filepath: str) -> Dict:
     """Reads the configuration file
@@ -306,74 +276,90 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
         The configuration dictionary
     """
     blob = []
-    for input in config['inputs']:
+    try:
+        for input in config['inputs']:
 
-        inpathname = os.path.join(inputs_path, input['osemosys_param'] + '.csv')
-        inputs = read_file(inpathname)
+            inpathname = os.path.join(inputs_path, input['osemosys_param'] + '.csv')
+            inputs = read_file(inpathname)
 
-        unit = input['unit']
+            unit = input['unit']
 
-        technologies = input['variable_cost']
-        data = filter_capacity(inputs, technologies)
+            technologies = input['variable_cost']
+            data = filter_capacity(inputs, technologies)
 
-        if not aggregated.empty:
-            iamc = make_iamc(data, config['model'], config['scenario'], input['iamc_variable'], unit)
-            blob.append(iamc)
+            if not data.empty:
+                data = data.rename(index={"REGION": 'region', 'VALUE': 'value'})
+                iamc = pyam.IamDataFrame(
+                    data.reset_index(),
+                    model=config['model'],
+                    scenario=config['scenario'],
+                    variable=input['iamc_variable'],
+                    unit=unit)
+                blob.append(iamc)
+    except KeyError:
+        pass
 
-    for result in config['results']:
+    try:
+        for result in config['results']:
 
-        if type(result['osemosys_param']) == str:
-            path_name = os.path.join(results_path, result['osemosys_param'] + '.csv')
-            results = read_file(path_name)
+            if type(result['osemosys_param']) == str:
+                path_name = os.path.join(results_path, result['osemosys_param'] + '.csv')
+                results = read_file(path_name)
 
-            try:
-                technologies = result['technology']
-            except KeyError:
-                pass
-            unit = result['unit']
-            if 'fuel' in result.keys():
-                fuels = result['fuel']
-                data = filter_fuel(results, technologies, fuels)
-            elif 'emission' in result.keys():
-                emission = result['emission']
-                data = filter_emission_tech(results, emission)
-            elif 'tech_emi' in result.keys():
-                emission = result['emissions']
-                technologies = result['tech_emi']
-                data = filter_emission_tech(results, emission, technologies)
-            elif 'capacity' in result.keys():
-                technologies = result['capacity']
-                data = filter_capacity(results, technologies)
-            elif 'primary_technology' in result.keys():
-                technologies = result['primary_technology']
-                data = filter_capacity(results, technologies)
-            elif 'excluded_prod_tech' in result.keys():
-                technologies = result['excluded_prod_tech']
-                data = filter_capacity(results, technologies)
-            elif 'el_prod_technology' in result.keys():
-                technologies = result['el_prod_technology']
-                data = filter_capacity(results, technologies)
-            elif 'demand' in result.keys():
-                demands = result['demand']
-                data = filter_final_energy(results, demands)
+                try:
+                    technologies = result['technology']
+                except KeyError:
+                    pass
+                unit = result['unit']
+                if 'fuel' in result.keys():
+                    fuels = result['fuel']
+                    data = filter_fuel(results, technologies, fuels)
+                elif 'emission' in result.keys():
+                    emission = result['emission']
+                    data = filter_emission_tech(results, emission)
+                elif 'tech_emi' in result.keys():
+                    emission = result['emissions']
+                    technologies = result['tech_emi']
+                    data = filter_emission_tech(results, emission, technologies)
+                elif 'capacity' in result.keys():
+                    technologies = result['capacity']
+                    data = filter_capacity(results, technologies)
+                elif 'primary_technology' in result.keys():
+                    technologies = result['primary_technology']
+                    data = filter_capacity(results, technologies)
+                elif 'excluded_prod_tech' in result.keys():
+                    technologies = result['excluded_prod_tech']
+                    data = filter_capacity(results, technologies)
+                elif 'el_prod_technology' in result.keys():
+                    technologies = result['el_prod_technology']
+                    data = filter_capacity(results, technologies)
+                elif 'demand' in result.keys():
+                    demands = result['demand']
+                    data = filter_final_energy(results, demands)
+                else:
+                    data = extract_results(results, technologies)
+
             else:
-                data = extract_results(results, technologies)
+                results = {}
+                for p in result['osemosys_param']:
+                    path_name = os.path.join(results_path, p + '.csv')
+                    results[p] = read_file(path_name)
+                if 'trade_tech' in result.keys():
+                    technologies = result['trade_tech']
+                    data = calculate_trade(results, technologies)
 
-        else:
-            results = {}
-            for p in result['osemosys_param']:
-                path_name = os.path.join(results_path, p + '.csv')
-                results[p] = read_file(path_name)
-            if 'trade_tech' in result.keys():
-                technologies = result['trade_tech']
-                data = calculate_trade(results, technologies)
 
-        # Sum over all columns that are not in REGION or YEAR
-        aggregated = data.groupby(by=['REGION', 'YEAR']).sum()
-
-        if not aggregated.empty:
-            iamc = make_iamc(aggregated, config['model'], config['scenario'], result['iamc_variable'], unit)
-            blob.append(iamc)
+            if not data.empty:
+                data = data.rename(columns={"REGION": 'region', 'VALUE': 'value'})
+                iamc = pyam.IamDataFrame(
+                    data,
+                    model=config['model'],
+                    scenario=config['scenario'],
+                    variable=result['iamc_variable'],
+                    unit=unit)
+                blob.append(iamc)
+    except KeyError:
+        pass
 
     all_data = pyam.concat(blob)
 
@@ -409,7 +395,7 @@ def entry_point():
     args = sys.argv[1:]
 
     if len(args) != 4:
-        print("Usage: python resultify.py <inputs_path> <results_path> <config_path> <output_path>")
+        print("Usage: osemosys2iamc <inputs_path> <results_path> <config_path> <output_path>")
         exit(1)
 
     inputs_path = args[0]

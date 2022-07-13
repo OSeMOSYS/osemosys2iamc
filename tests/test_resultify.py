@@ -16,22 +16,21 @@ class TestEmissions:
         actual = filter_emission_tech(input_data, emission)
 
         data = [
-            ["AT", "CO2",  2026, -6244.862561],
-            ["AT", "CO2", 2027,  -6529.532083],
-            ["AT", "CO2", 2030,   3043.148835],
-            ["AT", "CO2", 2031,   2189.064681],
-            ["AT", "CO2", 2032,   2315.821267],
-            ["BE", "CO2", 2026,  -2244.982800],
-            ["BE", "CO2", 2027,  -6746.886437],
-            ["BG", "CO2", 2030,  11096.556931],
-            ["BG", "CO2", 2031,  11069.257141],
-            ["BG", "CO2", 2032,  11041.957354]
+            ["AT", 2026, -6244.862561],
+            ["AT", 2027, -6529.532083],
+            ["AT", 2030,  3043.148835],
+            ["AT", 2031,  2189.064681],
+            ["AT", 2032,  2315.821267],
+            ["BE", 2026, -2244.982800],
+            ["BE", 2027, -6746.886437],
+            ["BG", 2030, 11096.556931],
+            ["BG", 2031, 11069.257141],
+            ["BG", 2032, 11041.957354]
         ]
 
         expected = pd.DataFrame(
             data=data,
-            columns=['REGION', 'EMISSION', 'YEAR', 'VALUE']).set_index(
-                ['REGION', 'EMISSION', 'YEAR'])
+            columns=['REGION', 'YEAR', 'VALUE'])
 
         pd.testing.assert_frame_equal(actual, expected)
 
@@ -45,18 +44,18 @@ class TestEmissions:
         actual = filter_emission_tech(input_data, emission, tech)
 
         data = [
-            ['AT', 'CO2', 2026, -7573.069442598169],
-            ['AT', 'CO2', 2027, -7766.777427515737],
-            ['BE', 'CO2', 2026, -2244.98280006968],
-            ['BE', 'CO2', 2027, -6746.886436926597],
+            ['AT', 2026, -7573.069442598169],
+            ['AT', 2027, -7766.777427515737],
+            ['BE', 2026, -2244.98280006968],
+            ['BE', 2027, -6746.886436926597],
         ]
 
         expected = pd.DataFrame(
             data=data,
-            columns=['REGION', 'EMISSION', 'YEAR', 'VALUE']).set_index(['REGION', 'EMISSION', 'YEAR'])
+            columns=['REGION', 'YEAR', 'VALUE'])
         print(actual)
         print(expected)
-        pd.testing.assert_frame_equal(actual, expected, check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
 class TestFilter:
 
@@ -69,19 +68,15 @@ class TestFilter:
         actual = filter_fuel(input_data, technologies, fuels)
 
         data = [
-            ['Globe', 'ID', 'ALUPLANT', 'C1_P_HCO', 2010, 0.399179303],
-            ['Globe', 'ID', 'ALUPLANT', 'C1_P_HCO', 2011, 0.397804018],
-            ['Globe', 'ID', 'ALUPLANT', 'C1_P_HCO', 2012, 0.390495285],
-            ['Globe', 'IN', 'ALUPLANT', 'C1_P_HCO', 2010, 0.399179303],
-            ['Globe', 'IN', 'ALUPLANT', 'C1_P_HCO', 2011, 0.397804018],
-            ['Globe', 'IN', 'ALUPLANT', 'C1_P_HCO', 2012, 0.390495285],
-            ['Globe', 'IP', 'ALUPLANT', 'C1_P_HCO', 2010, 0.029739228],
-            ['Globe', 'IP', 'ALUPLANT', 'C1_P_HCO', 2011, 0.029739228],
-            ['Globe', 'IP', 'ALUPLANT', 'C1_P_HCO', 2012, 0.07106111],
+            ["Globe",  2010,  0.828098],
+            ["Globe",  2011,  0.825347],
+            ["Globe",  2012,  0.852052]
         ]
+        expected = pd.DataFrame(data=data,
+            columns=['REGION', 'YEAR', 'VALUE'])
 
-        expected = pd.DataFrame(data=data, columns=['REGION', 'TIMESLICE', 'TECHNOLOGY', 'FUEL', 'YEAR', 'VALUE']).set_index(
-            ['REGION', 'TIMESLICE', 'TECHNOLOGY', 'FUEL', 'YEAR'])
+        print(actual, type(actual))
+        print(expected, type(expected))
 
         pd.testing.assert_frame_equal(actual, expected)
 
@@ -115,9 +110,7 @@ class TestEnergy:
             ['FR', 2015, 72.25974846],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
 
         pd.testing.assert_frame_equal(actual, expected)
 
@@ -136,9 +129,7 @@ class TestEnergy:
             ['AT',2019,26.324108350683794],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
 
         pd.testing.assert_frame_equal(actual, expected)
 
@@ -157,9 +148,7 @@ class TestEnergy:
             ['CH',2051,53.88447040760964],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
 
         pd.testing.assert_frame_equal(actual, expected)
 
@@ -174,9 +163,7 @@ class TestEnergy:
             ['BE',2016,141.0],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
 
         pd.testing.assert_frame_equal(actual, expected)
 
@@ -191,9 +178,7 @@ class TestEnergy:
             ['BG',2015,1.423512],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_hy(self):
@@ -207,9 +192,7 @@ class TestEnergy:
             ['CZ',2015,3.3637616987287244],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_nu(self):
@@ -223,10 +206,7 @@ class TestEnergy:
             ['CZ',2015,326.2313192401038],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
-
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_oc(self):
@@ -240,9 +220,7 @@ class TestEnergy:
             ['DK',2015,0.0031536000000000003],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
 
         pd.testing.assert_frame_equal(actual, expected)
 
@@ -257,9 +235,7 @@ class TestEnergy:
             ['EE',2015,28.512107999999998],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
 
         pd.testing.assert_frame_equal(actual, expected)
 
@@ -274,9 +250,7 @@ class TestEnergy:
             ['ES',2015,26.75595496070811],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
 
         pd.testing.assert_frame_equal(actual, expected)
 
@@ -292,9 +266,7 @@ class TestEnergy:
             ['FR', 2015, 72.25974845531343]
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
 
         pd.testing.assert_frame_equal(actual, expected)
 
@@ -313,9 +285,7 @@ class TestEnergy:
             ['AT', 2046, 3.4778527409137996]
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
 
         pd.testing.assert_frame_equal(actual, expected)
 
@@ -331,9 +301,7 @@ class TestEnergy:
             ['BE',2016,296.0570016],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
         print(actual)
         print(expected)
@@ -372,9 +340,7 @@ class TestCapacity:
             ['FR',2015,0.47835],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
         print(actual)
 
@@ -394,9 +360,7 @@ class TestCapacity:
             ['FR', 2015, 0.47835],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
         pd.testing.assert_frame_equal(actual, expected)
 
@@ -410,9 +374,7 @@ class TestCapacity:
             ['BG',2015,4.141],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
         pd.testing.assert_frame_equal(actual, expected)
 
@@ -426,9 +388,7 @@ class TestCapacity:
             ['DE',2015,9.62143],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
         pd.testing.assert_frame_equal(actual, expected)
 
@@ -442,9 +402,7 @@ class TestCapacity:
             ['CH',2026,0.004563975391582646],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
         pd.testing.assert_frame_equal(actual, expected)
 
@@ -458,9 +416,7 @@ class TestCapacity:
             ['CZ',2015,0.299709],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
         pd.testing.assert_frame_equal(actual, expected)
 
@@ -474,9 +430,7 @@ class TestCapacity:
             ['ES',2015,7.7308],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
         pd.testing.assert_frame_equal(actual, expected)
 
@@ -490,9 +444,7 @@ class TestCapacity:
             ['DK',2015,0.0005],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
         pd.testing.assert_frame_equal(actual, expected)
 
@@ -506,9 +458,7 @@ class TestCapacity:
             ['CY',2015,0.3904880555817921],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
         pd.testing.assert_frame_equal(actual, expected)
 
@@ -522,9 +472,7 @@ class TestCapacity:
             ['EE',2015,0.006],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
         pd.testing.assert_frame_equal(actual, expected)
 
@@ -538,9 +486,7 @@ class TestCapacity:
             ['FI',2015,0.0263],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
         pd.testing.assert_frame_equal(actual, expected)
 
@@ -559,9 +505,7 @@ class TestPrice:
             ['BE',2016,2.327755063],
         ]
 
-        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"]).set_index(
-             ["REGION", "YEAR"]
-        )
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
         print(actual)
         print(expected)
