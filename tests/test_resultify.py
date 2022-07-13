@@ -499,10 +499,10 @@ class TestPrice:
         actual = filter_capacity(input_data, commodity)
 
         data = [
-            ['AT',2015,2.327755063],
-            ['AT',2016,2.327755063],
-            ['BE',2015,2.327755063],
-            ['BE',2016,2.327755063],
+            ['AT',2015,3.0],
+            ['AT',2016,4.0],
+            ['BE',2015,1.7],
+            ['BE',2016,1.8],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])

@@ -13,6 +13,7 @@ where:
 
 """
 import functools
+from multiprocessing.sharedctypes import Value
 import pandas as pd
 import pyam
 from openentrance import iso_mapping
@@ -89,6 +90,7 @@ def filter_emission_tech(df: pd.DataFrame, emission: List[str], technologies: Op
     """
 
     df['REGION'] = df['TECHNOLOGY'].str[:2]
+    # df['REGION'] = df['REGION'].map(iso_mapping)
     df = filter_regex(df, emission, 'EMISSION')
 
     if technologies:
@@ -114,6 +116,7 @@ def filter_capacity(df: pd.DataFrame, technologies: List[str]) -> pd.DataFrame:
     pandas.DataFrame
     """
     df['REGION'] = df['TECHNOLOGY'].str[:2]
+    # df['REGION'] = df['REGION'].map(iso_mapping)
     df = filter_technologies(df, technologies)
 
     df = df.groupby(by=['REGION','YEAR'], as_index=False)["VALUE"].sum()
@@ -128,6 +131,8 @@ def filter_final_energy(df: pd.DataFrame, fuels: List) -> pd.DataFrame:
             exit(1)
 
     df['REGION'] = df['FUEL'].str[:2]
+    # df['REGION'] = df['REGION'].map(iso_mapping)
+
     df['FUEL'] = df['FUEL'].str[2:]
     df_f = filter_fuels(df, fuels)
 
@@ -288,9 +293,11 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
             data = filter_capacity(inputs, technologies)
 
             if not data.empty:
-                data = data.rename(index={"REGION": 'region', 'VALUE': 'value'})
+                data = data.rename(columns={'REGION': 'region',
+                                            'YEAR': 'year',
+                                            'VALUE': 'value'})
                 iamc = pyam.IamDataFrame(
-                    data.reset_index(),
+                    data,
                     model=config['model'],
                     scenario=config['scenario'],
                     variable=input['iamc_variable'],
@@ -350,7 +357,10 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
 
 
             if not data.empty:
-                data = data.rename(columns={"REGION": 'region', 'VALUE': 'value'})
+                data = data.rename(columns={'REGION': 'region',
+                                            'YEAR': 'year',
+                                            'VALUE': 'value'})
+                print(data)
                 iamc = pyam.IamDataFrame(
                     data,
                     model=config['model'],
@@ -367,9 +377,19 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
     all_data = all_data.convert_unit('ktCO2/yr', to='Mt CO2/yr', factor=0.001)
     all_data = all_data.convert_unit('MEUR_2015/PJ', to='EUR_2020/GJ', factor=1.05)
     all_data = all_data.convert_unit('kt CO2/yr', to='Mt CO2/yr')
-    all_data.index = all_data.index.set_levels(all_data.index.levels[2].map(iso_mapping), level=2)
+
+    if iso_mapping is not None:
+        data = all_data.timeseries()
+        data.index = data.index.set_levels(data.index.levels[2].map(iso_mapping), level=2)
+        all_data = pyam.IamDataFrame(data)
+    else:
+        msg = "Please ensure that the openentrance package is installed as an editable library " \
+              "See https://github.com/openENTRANCE/openentrance/issues/202"
+        raise ValueError(msg)
+
     all_data = pyam.IamDataFrame(all_data)
     return all_data
+
 
 def aggregate(func):
     """Decorator for filters which returns the aggregated data
