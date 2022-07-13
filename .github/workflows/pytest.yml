@@ -36,7 +36,8 @@ jobs:
            pip install pytest-cov
 
     - name: Install the package
-      run: pip install .
+      run: pip install -e git+https://github.com/openENTRANCE/openentrance.git@main#egg=openentrance
+           pip install .
 
     - name: Test with pytest
       run: pytest
