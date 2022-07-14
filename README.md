@@ -4,11 +4,15 @@ Convert OSeMOSYS results to IAMC format
 
 ## Install from Github repository
 
+It is currently necessary to install the OpenEntrance dependency as an editable installation.
+See [issue](https://github.com/openENTRANCE/openentrance/issues/202)
+
+    pip install -e git+https://github.com/openENTRANCE/openentrance.git@main#egg=openentrance
     pip install git+https://github.com/osesmosys/osemosys2iamc@main#egg=osemosys2iamc
 
 ## Run the demo
 
-    osemosys2iamc results config.yaml  test.csv
+    osemosys2iamc results config.yaml  test.csv iamc.xlsx
 
 Check out the IAMC formatted results in `test.csv` and plots `emissions.csv`
 
