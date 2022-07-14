@@ -32,12 +32,14 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install pytest
-      run: pip install pytest
-           pip install pytest-cov
+      run: |
+        pip install pytest
+        pip install pytest-cov
 
     - name: Install the package
-      run: pip install -e git+https://github.com/openENTRANCE/openentrance.git@main#egg=openentrance
-           pip install .
+      run: |
+        pip install -e git+https://github.com/openENTRANCE/openentrance.git@main#egg=openentrance
+        pip install .
 
     - name: Test with pytest
       run: pytest
