@@ -37,7 +37,7 @@ def filter_regex(df: pd.DataFrame, patterns: List[str], column: str) -> pd.DataF
     This function returns the rows where the values in a ``column`` match the
     list of regular expression ``patterns``
     """
-    masks = [df[column].str.contains(p, regex=True) for p in patterns]
+    masks = [df[column].str.match(p) for p in patterns]
     return pd.concat([df[mask] for mask in masks])
 
 def filter_fuels(df: pd.DataFrame, fuels: List[str]) -> pd.DataFrame:
