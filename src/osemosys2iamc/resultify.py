@@ -14,6 +14,7 @@ where:
 """
 import functools
 from multiprocessing.sharedctypes import Value
+from sqlite3 import DatabaseError
 import pandas as pd
 import pyam
 from openentrance import iso_mapping
@@ -131,7 +132,6 @@ def filter_final_energy(df: pd.DataFrame, fuels: List) -> pd.DataFrame:
             exit(1)
 
     df['REGION'] = df['FUEL'].str[:2]
-    # df['REGION'] = df['REGION'].map(iso_mapping)
 
     df['FUEL'] = df['FUEL'].str[2:]
     df_f = filter_fuels(df, fuels)
