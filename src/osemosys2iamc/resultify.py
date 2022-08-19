@@ -321,13 +321,14 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
                 if 'fuel' in result.keys():
                     fuels = result['fuel']
                     data = filter_fuel(results, technologies, fuels)
-                elif 'emission' in result.keys():
-                    emission = result['emission']
-                    data = filter_emission_tech(results, emission)
-                elif 'tech_emi' in result.keys():
-                    emission = result['emissions']
-                    technologies = result['tech_emi']
-                    data = filter_emission_tech(results, emission, technologies)
+                elif 'emissions' in result.keys():
+                    if 'tech_emi' in result.keys():
+                        emission = result['emissions']
+                        technologies = result['tech_emi']
+                        data = filter_emission_tech(results, emission, technologies)
+                    else:
+                        emission = result['emissions']
+                        data = filter_emission_tech(results, emission)
                 elif 'capacity' in result.keys():
                     technologies = result['capacity']
                     data = filter_capacity(results, technologies)
@@ -355,6 +356,9 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
                     technologies = result['trade_tech']
                     data = calculate_trade(results, technologies)
 
+            if 'transform' in result.keys():
+                if result['transform'] == 'abs':
+                    data['VALUE'] = data['VALUE'].abs()
 
             if not data.empty:
                 data = data.rename(columns={'REGION': 'region',

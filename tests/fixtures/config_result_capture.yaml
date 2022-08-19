@@ -1,0 +1,10 @@
+model: OSeMBE v1.0.0
+scenario: DIAG-C400-lin-ResidualFossil
+region: ['Austria'] #, 'Belgium', 'Bulgaria', 'Switzerland', 'Cyprus', 'Czech Republic', 'Germany', 'Denmark', 'Estonia', 'Spain', 'Finland', 'France', 'Greece', 'Croatia', 'Hungary', 'Ireland', 'Italy', 'Lithuania', 'Luxembourg', 'Latvia', 'Malta', 'The Netherlands', 'Norway', 'Poland', 'Portugal', 'Romania', 'Sweden', 'Slovenia', 'Slovakia', 'United Kingdom',]
+results:
+- iamc_variable: 'Carbon Capture|Biomass'
+  tech_emi: ['(?=^.{2}(BM))^.{4}(CS)']
+  emissions: [CO2]
+  unit: kt CO2/yr
+  transform: abs
+  osemosys_param: AnnualTechnologyEmissions
