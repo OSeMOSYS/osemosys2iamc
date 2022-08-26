@@ -2,7 +2,49 @@ from datetime import date
 import pandas as pd
 import os
 import pytest
-from osemosys2iamc.resultify import filter_fuel, filter_emission_tech, filter_final_energy, filter_capacity
+from osemosys2iamc.resultify import (filter_fuel,
+                                     filter_emission_tech,
+                                     filter_final_energy,
+                                     filter_capacity,
+                                     calculate_trade)
+
+
+class TestTrade:
+
+    def test_trade(self):
+
+        use = [
+            ['REGION1','ID','ATBM00X00','ATBM', 2014, 5.0],
+            ['REGION1','ID','ATBM00X00','ATBM', 2015, 5.0],
+            ]
+
+        production = [
+            ['REGION1','ATBM00X00','ATBM', 2015, 10.0],
+            ['REGION1','ATBM00X00','ATBM', 2016, 10.0],
+        ]
+
+        results = {
+            'UseByTechnology': pd.DataFrame(
+                data = use,
+                columns = ['REGION','TIMESLICE','TECHNOLOGY','FUEL','YEAR','VALUE']
+            ),
+            'ProductionByTechnologyAnnual': pd.DataFrame(
+                data = production,
+                columns=['REGION','TECHNOLOGY','FUEL','YEAR','VALUE'])
+        }
+
+        techs = ['ATBM00X00']
+
+        actual = calculate_trade(results, techs)
+
+        expected_data = [
+            ['AT',2014,  5.0],
+            ['AT',2015, -5.0],
+            ['AT',2016, -10.0],
+        ]
+
+        expected = pd.DataFrame(expected_data, columns=['REGION', 'YEAR', 'VALUE'])
+        pd.testing.assert_frame_equal(actual, expected)
 
 
 class TestEmissions:

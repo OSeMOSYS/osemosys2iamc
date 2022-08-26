@@ -91,7 +91,6 @@ def filter_emission_tech(df: pd.DataFrame, emission: List[str], technologies: Op
     """
 
     df['REGION'] = df['TECHNOLOGY'].str[:2]
-    # df['REGION'] = df['REGION'].map(iso_mapping)
     df = filter_regex(df, emission, 'EMISSION')
 
     if technologies:
@@ -103,7 +102,6 @@ def filter_emission_tech(df: pd.DataFrame, emission: List[str], technologies: Op
 
 def filter_capacity(df: pd.DataFrame, technologies: List[str]) -> pd.DataFrame:
     """Return aggregated rows filtered on technology column.
-
 
     Parameters
     ----------
@@ -117,7 +115,6 @@ def filter_capacity(df: pd.DataFrame, technologies: List[str]) -> pd.DataFrame:
     pandas.DataFrame
     """
     df['REGION'] = df['TECHNOLOGY'].str[:2]
-    # df['REGION'] = df['REGION'].map(iso_mapping)
     df = filter_technologies(df, technologies)
 
     df = df.groupby(by=['REGION','YEAR'], as_index=False)["VALUE"].sum()
@@ -143,43 +140,11 @@ def calculate_trade(results: dict, techs: List) -> pd.DataFrame:
     """Return dataframe with the net exports of a commodity
     """
 
-    countries = pd.Series(dtype='object')
-    years = pd.Series()
-    for p in results:
-        df = results[p]
-        df_f = filter_technologies(techs)
+    exports = filter_capacity(results['UseByTechnology'], techs).set_index(['REGION', 'YEAR'])
+    imports = filter_capacity(results['ProductionByTechnologyAnnual'], techs).set_index(['REGION', 'YEAR'])
+    df = exports.subtract(imports, fill_value=0)
 
-        df_f['REGION'] = df_f['FUEL'].str[:2]
-        df_f = df_f.drop(columns='FUEL')
-        df_f = df_f.groupby(by=['REGION', 'YEAR']).sum()
-        df_f = df_f.reset_index(level=['REGION', 'YEAR'])
-
-        countries = countries.append(df_f.loc[:,'REGION'])
-        years = years.append(df_f.loc[:,'YEAR'])
-        results[p] = df_f
-
-    countries = countries.unique()
-    years = years.unique()
-    exports = results['UseByTechnology']
-    imports = results['ProductionByTechnologyAnnual']
-
-    df = pd.DataFrame(columns=['REGION','YEAR','VALUE'])
-    for country in countries:
-        for year in years:
-            if not exports[(exports['REGION']==country)&(exports['YEAR']==year)].empty:
-                if not imports[(imports['REGION']==country)&(imports['YEAR']==year)].empty:
-                    value = exports[(exports['REGION']==country)&(exports['YEAR']==year)].iloc[0]['VALUE']-imports[(imports['REGION']==country)&(imports['YEAR']==year)].iloc[0]['VALUE']
-                    df = df.append({'REGION': country, 'YEAR': year, 'VALUE': value}, ignore_index=True)
-                else:
-                    value = exports[(exports['REGION']==country)&(exports['YEAR']==year)].iloc[0]['VALUE']
-                    df = df.append({'REGION': country, 'YEAR': year, 'VALUE': value}, ignore_index=True)
-            else:
-                if not imports[(imports['REGION']==country)&(imports['YEAR']==year)].empty:
-                    value = -imports[(imports['REGION']==country)&(imports['YEAR']==year)].iloc[0]['VALUE']
-                    df = df.append({'REGION': country, 'YEAR': year, 'VALUE': value}, ignore_index=True)
-
-
-    return df
+    return df.reset_index()
 
 def extract_results(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
     """Return rows which match ``technologies``
@@ -359,12 +324,14 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
             if 'transform' in result.keys():
                 if result['transform'] == 'abs':
                     data['VALUE'] = data['VALUE'].abs()
+                else:
+                    pass
 
             if not data.empty:
                 data = data.rename(columns={'REGION': 'region',
                                             'YEAR': 'year',
                                             'VALUE': 'value'})
-                print(data)
+                # print(data)
                 iamc = pyam.IamDataFrame(
                     data,
                     model=config['model'],
@@ -434,7 +401,7 @@ def entry_point():
     model = config['model']
     scenario = config['scenario']
     regions = config['region']
-    make_plots(all_data, model, scenario, regions)
+    # make_plots(all_data, model, scenario, regions)
 
     all_data.to_excel(outpath, sheet_name='data')
 
