@@ -10,11 +10,15 @@ See [issue](https://github.com/openENTRANCE/openentrance/issues/202)
     pip install git+https://github.com/osemosys/osemosys2iamc@main#egg=osemosys2iamc
     pip install -e git+https://github.com/openENTRANCE/openentrance.git@main#egg=openentrance
 
-## Run the demo
+## Run the package
 
-    osemosys2iamc results config.yaml  test.csv iamc.xlsx
+    $ osemosys2iamc --help
+    osemosys2iamc <inputs_path> <results_path> <config_path> <output_path>
 
-Check out the IAMC formatted results in `test.csv` and plots `emissions.csv`
+`inputs_path`: Path to a folder of csv files (OSeMOSYS inputs). File names should correspond to OSeMOSYS parameter names.
+`results_path`: Path to a folder of csv files (OSeMOSYS results). File names should correspond to OSeMOSYS variable names.
+`config_path`: Path to the configuration file (see below)
+`output_path`: Path to the .xlsx file you wish to write out
 
 ## The IAMC format
 

@@ -245,6 +245,10 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
     ---------
     config : dict
         The configuration dictionary
+    inputs_path: str
+        Path to a folder of csv files (OSeMOSYS inputs)
+    results_path: str
+        Path to a folder of csv files (OSeMOSYS results)
     """
     blob = []
     try:
