@@ -7,8 +7,8 @@ Convert OSeMOSYS results to IAMC format
 It is currently necessary to install the OpenEntrance dependency as an editable installation.
 See [issue](https://github.com/openENTRANCE/openentrance/issues/202)
 
-    pip install -e git+https://github.com/openENTRANCE/openentrance.git@main#egg=openentrance
     pip install git+https://github.com/osemosys/osemosys2iamc@main#egg=osemosys2iamc
+    pip install -e git+https://github.com/openENTRANCE/openentrance.git@main#egg=openentrance
 
 ## Run the demo
 
@@ -40,13 +40,13 @@ Write a configuration file in YAML format. A simple configuration file with one 
 
     model: OSeMBE v1.0.0
     scenario: DIAG-C400-lin-ResidualFossil
-    region: ['Austria']
+    region: ['Austria']  # select countries to plot summary results
     results:
     - iamc_variable: 'Carbon Capture|Biomass'
-    tech_emi: ['(?=^.{2}(BM))^.{4}(CS)']
-    emissions: [CO2]
-    unit: kt CO2/yr
-    transform: abs
+      tech_emi: ['(?=^.{2}(BM))^.{4}(CS)']
+      emissions: [CO2]
+      unit: kt CO2/yr
+      transform: abs
     osemosys_param: AnnualTechnologyEmissions
 
 The first section of the configuration file with the keys `model`, `scenario`, and `region` are used to define the metadata for
