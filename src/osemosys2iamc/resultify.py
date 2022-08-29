@@ -20,7 +20,7 @@ import pyam
 from openentrance import iso_mapping
 import sys
 import os
-from typing import List, Dict, Union, Optional
+from typing import List, Dict, Optional
 from yaml import load, SafeLoader
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -167,7 +167,7 @@ def load_config(filepath: str) -> Dict:
         config = load(configfile, Loader=SafeLoader)
     return config
 
-def make_plots(df, model: str, scenario: str, regions: list):
+def make_plots(df: pyam.IamDataFrame, model: str, scenario: str, regions: List[str]):
     """Creates standard plots
 
     Arguments
@@ -182,26 +182,28 @@ def make_plots(df, model: str, scenario: str, regions: list):
     # regions = config['region']#for testing
 
     args = dict(model=model, scenario=scenario)
-    print(args)
+    print(args, regions)
+
+    fig, ax = plt.subplots()
+
+    assert isinstance(regions, list)
 
     for region in regions:
-
-    # Plot primary energy
-        fig, ax = plt.subplots()
-        print(ax)
-        pe = df.filter(**args, variable='Primary Energy|*', region=region)
-        if pe:
+        assert isinstance(region, str)
+        print(f"Plotting {region}")
+        # Plot primary energy
+        data = df.filter(**args, variable='Primary Energy|*', region=region) # type: pyam.IamDataFrame
+        if data:
+            print(data)
             locator = mdates.AutoDateLocator(minticks=10)
             #locator.intervald['YEARLY'] = [10]
-            pe.plot.bar(ax=ax, stacked=True, title='Primary energy mix %s' % region)
+            data.plot.bar(ax=ax, stacked=True, title='Primary energy mix %s' % region)
             plt.legend(bbox_to_anchor=(0.,-0.5), loc='upper left')
             plt.tight_layout()
             ax.xaxis.set_major_locator(locator)
             fig.savefig('primary_energy_%s.pdf' % region, bbox_inches='tight', transparent=True, pad_inches=0)
-
-    # Plot secondary energy (electricity generation)
-        fig, ax = plt.subplots()
-        print(ax)
+            plt.clf()
+        # Plot secondary energy (electricity generation)
         se = df.filter(**args, variable='Secondary Energy|Electricity|*', region=region)
         if se:
             locator = mdates.AutoDateLocator(minticks=10)
@@ -211,27 +213,26 @@ def make_plots(df, model: str, scenario: str, regions: list):
             plt.tight_layout()
             ax.xaxis.set_major_locator(locator)
             fig.savefig('electricity_generation_%s.pdf' % region, bbox_inches='tight', transparent=True, pad_inches=0)
-
-    # Create generation capacity plot
-        fig, ax = plt.subplots()
+            plt.clf()
+        # Create generation capacity plot
         cap = df.filter(**args, variable='Capacity|Electricity|*', region=region)
         if cap:
             cap.plot.bar(ax=ax, stacked=True, title='Generation Capacity %s' % region)
             plt.legend(bbox_to_anchor=(0.,-0.25),loc='upper left')
             plt.tight_layout()
             fig.savefig('capacity_%s.pdf' % region, bbox_inches='tight', transparent=True, pad_inches=0)
+            plt.clf()
 
     # Create emissions plot
     emi = df.filter(**args, variable="Emissions|CO2*").filter(region="World", keep=False)
-    print(emi)
+    # print(emi)
     if emi:
-        fig, ax = plt.subplots()
         emi.plot.bar(ax=ax,
             bars="region", stacked=True, title="CO2 emissions by region", cmap="tab20"
             )
         plt.legend(bbox_to_anchor=(1.,1.05),loc='upper left', ncol=2)
         fig.savefig('emission.pdf', bbox_inches='tight', transparent=True, pad_inches=0)
-
+        plt.clf()
 
 
 def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame:
@@ -401,6 +402,8 @@ def entry_point():
     model = config['model']
     scenario = config['scenario']
     regions = config['region']
+
+    # Plotting fail reported in [issue 25](https://github.com/OSeMOSYS/osemosys2iamc/issues/25)
     # make_plots(all_data, model, scenario, regions)
 
     all_data.to_excel(outpath, sheet_name='data')
