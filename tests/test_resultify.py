@@ -2,7 +2,7 @@ from datetime import date
 import pandas as pd
 import os
 import pytest
-from osemosys2iamc.resultify import (filter_fuel,
+from osemosys2iamc.resultify import (filter_technology_fuel,
                                      filter_emission_tech,
                                      filter_final_energy,
                                      filter_capacity,
@@ -107,7 +107,7 @@ class TestFilter:
 
         technologies = ['ALUPLANT']
         fuels = ['C1_P_HCO']
-        actual = filter_fuel(input_data, technologies, fuels)
+        actual = filter_technology_fuel(input_data, technologies, fuels)
 
         data = [
             ["Globe",  2010,  0.828098],

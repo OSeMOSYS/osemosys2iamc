@@ -65,7 +65,7 @@ def filter_technologies(df: pd.DataFrame, technologies: List[str]) -> pd.DataFra
     """
     return filter_regex(df, technologies, 'TECHNOLOGY')
 
-def filter_fuel(df: pd.DataFrame, technologies: List, fuels: List) -> pd.DataFrame:
+def filter_technology_fuel(df: pd.DataFrame, technologies: List, fuels: List) -> pd.DataFrame:
     """Return rows which match ``technologies`` and ``fuels``
     """
     df = filter_technologies(df, technologies)
@@ -290,7 +290,7 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
                 unit = result['unit']
                 if 'fuel' in result.keys():
                     fuels = result['fuel']
-                    data = filter_fuel(results, technologies, fuels)
+                    data = filter_technology_fuel(results, technologies, fuels)
                 elif 'emissions' in result.keys():
                     if 'tech_emi' in result.keys():
                         emission = result['emissions']
