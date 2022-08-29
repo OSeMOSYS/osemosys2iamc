@@ -80,13 +80,13 @@ regular expression.
 Writing regular expressions can be tricky, but there are [useful tools](https://regexr.com/) to help.
 Below we provide some examples:
 
-`^.{2}(WI)` match rows with exactly two characters followed by `WI`
+`^.{2}(WI)` match rows with any two characters followed by `WI`
 
 `(?=^.{2}(HF))^((?!00).)*$` match rows with `HF` in 3rd and 4th position which do not include `00`
 
 `(?=^.{2}(NG))^((?!(00)|(CS)).)*$` match rows with `NG` in 3rd and 4th position that do not include `00` or `CS`
 
-`^.{6}(I0)` match rows which contain exactly 6 characters followed by `IO` in the 7th and 8th position
+`^.{6}(I0)` match rows which contain any 6 characters followed by `IO` in the 7th and 8th position
 
 Putting this together, the following entry extracts results from the result file `ProductionByTechnologyAnnual.csv`, filters out the rows
 by matching values in the TECHNOLOGY column with a list of 6 regular expressions (this is an OR operation)
