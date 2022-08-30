@@ -2,7 +2,49 @@ from datetime import date
 import pandas as pd
 import os
 import pytest
-from osemosys2iamc.resultify import extract_results, filter_var_cost, filter_fuel, filter_emission, filter_emission_tech, filter_ProdByTechAn, filter_final_energy, filter_capacity
+from osemosys2iamc.resultify import (filter_technology_fuel,
+                                     filter_emission_tech,
+                                     filter_final_energy,
+                                     filter_capacity,
+                                     calculate_trade)
+
+
+class TestTrade:
+
+    def test_trade(self):
+
+        use = [
+            ['REGION1','ID','ATBM00X00','ATBM', 2014, 5.0],
+            ['REGION1','ID','ATBM00X00','ATBM', 2015, 5.0],
+            ]
+
+        production = [
+            ['REGION1','ATBM00X00','ATBM', 2015, 10.0],
+            ['REGION1','ATBM00X00','ATBM', 2016, 10.0],
+        ]
+
+        results = {
+            'UseByTechnology': pd.DataFrame(
+                data = use,
+                columns = ['REGION','TIMESLICE','TECHNOLOGY','FUEL','YEAR','VALUE']
+            ),
+            'ProductionByTechnologyAnnual': pd.DataFrame(
+                data = production,
+                columns=['REGION','TECHNOLOGY','FUEL','YEAR','VALUE'])
+        }
+
+        techs = ['ATBM00X00']
+
+        actual = calculate_trade(results, techs)
+
+        expected_data = [
+            ['AT',2014,  5.0],
+            ['AT',2015, -5.0],
+            ['AT',2016, -10.0],
+        ]
+
+        expected = pd.DataFrame(expected_data, columns=['REGION', 'YEAR', 'VALUE'])
+        pd.testing.assert_frame_equal(actual, expected)
 
 
 class TestEmissions:
@@ -13,28 +55,26 @@ class TestEmissions:
         input_data = pd.read_csv(filepath)
 
         emission = ['CO2']
-        actual = filter_emission(input_data, emission)
+        actual = filter_emission_tech(input_data, emission)
 
         data = [
-            ['AT', 'CO2', 2026, -7573.069442598169],
-            ['AT', 'CO2', 2027, -7766.777427515737],
-            ['AT', 'CO2', 2030, 3043.14883455963],
-            ['AT', 'CO2', 2031, 2189.064680841067],
-            ['AT', 'CO2', 2032, 2315.8212665203155],
-            ['AT', 'CO2', 2026, 1328.206881170592],
-            ['AT', 'CO2', 2027, 1237.245344603424],
-            ['BE', 'CO2', 2026, -2244.98280006968],
-            ['BE', 'CO2', 2027, -6746.886436926597],
-            ["BG", 'CO2', 2030, 11096.55693088164],
-            ["BG", 'CO2', 2031, 11069.257140908643],
-            ["BG", 'CO2', 2032, 11041.957354265856],
+            ["AT", 2026, -6244.862561],
+            ["AT", 2027, -6529.532083],
+            ["AT", 2030,  3043.148835],
+            ["AT", 2031,  2189.064681],
+            ["AT", 2032,  2315.821267],
+            ["BE", 2026, -2244.982800],
+            ["BE", 2027, -6746.886437],
+            ["BG", 2030, 11096.556931],
+            ["BG", 2031, 11069.257141],
+            ["BG", 2032, 11041.957354]
         ]
 
-        expected = pd.DataFrame(data=data, columns=['REGION', 'EMISSION', 'YEAR', 'VALUE'])
+        expected = pd.DataFrame(
+            data=data,
+            columns=['REGION', 'YEAR', 'VALUE'])
 
-        index = ['REGION', 'EMISSION', 'YEAR']
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_tech_emission(self):
 
@@ -43,20 +83,21 @@ class TestEmissions:
 
         tech = ['(?=^.{2}(BM))^.{4}(CS)']
         emission = ['CO2']
-        actual = filter_emission_tech(input_data, tech, emission)
+        actual = filter_emission_tech(input_data, emission, tech)
 
         data = [
-            ['AT', 'CO2', 2026, 7573.069442598169],
-            ['AT', 'CO2', 2027, 7766.777427515737],
-            ['BE', 'CO2', 2026, 2244.98280006968],
-            ['BE', 'CO2', 2027, 6746.886436926597],
+            ['AT', 2026, -7573.069442598169],
+            ['AT', 2027, -7766.777427515737],
+            ['BE', 2026, -2244.98280006968],
+            ['BE', 2027, -6746.886436926597],
         ]
 
-        expected = pd.DataFrame(data=data, columns=['REGION', 'EMISSION', 'YEAR', 'VALUE'])
-
-        index = ['REGION', 'EMISSION', 'YEAR']
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        expected = pd.DataFrame(
+            data=data,
+            columns=['REGION', 'YEAR', 'VALUE'])
+        print(actual)
+        print(expected)
+        pd.testing.assert_frame_equal(actual, expected)
 
 class TestFilter:
 
@@ -66,34 +107,29 @@ class TestFilter:
 
         technologies = ['ALUPLANT']
         fuels = ['C1_P_HCO']
-        actual = filter_fuel(input_data, technologies, fuels)
+        actual = filter_technology_fuel(input_data, technologies, fuels)
 
         data = [
-            ['Globe', 'ID', 'ALUPLANT', 'C1_P_HCO', 2010, 0.399179303],
-            ['Globe', 'ID', 'ALUPLANT', 'C1_P_HCO', 2011, 0.397804018],
-            ['Globe', 'ID', 'ALUPLANT', 'C1_P_HCO', 2012, 0.390495285],
-            ['Globe', 'IN', 'ALUPLANT', 'C1_P_HCO', 2010, 0.399179303],
-            ['Globe', 'IN', 'ALUPLANT', 'C1_P_HCO', 2011, 0.397804018],
-            ['Globe', 'IN', 'ALUPLANT', 'C1_P_HCO', 2012, 0.390495285],
-            ['Globe', 'IP', 'ALUPLANT', 'C1_P_HCO', 2010, 0.029739228],
-            ['Globe', 'IP', 'ALUPLANT', 'C1_P_HCO', 2011, 0.029739228],
-            ['Globe', 'IP', 'ALUPLANT', 'C1_P_HCO', 2012, 0.07106111],
+            ["Globe",  2010,  0.828098],
+            ["Globe",  2011,  0.825347],
+            ["Globe",  2012,  0.852052]
         ]
+        expected = pd.DataFrame(data=data,
+            columns=['REGION', 'YEAR', 'VALUE'])
 
-        expected = pd.DataFrame(data=data, columns=['REGION', 'TIMESLICE', 'TECHNOLOGY', 'FUEL', 'YEAR', 'VALUE'])
+        print(actual, type(actual))
+        print(expected, type(expected))
 
-        index = ['REGION', 'TIMESLICE', 'TECHNOLOGY', 'FUEL', 'YEAR']
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
 class TestEnergy:
 
-    def test_filter_ProdByTechAn(self):
+    def test_filter_capacity(self):
         filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
         input_data = pd.read_csv(filepath)
 
         technologies = ['^.{6}(I0)','^.{6}(X0)','^.{2}(HY)','^.{2}(OC)','^.{2}(SO)','^.{2}(WI)']
-        actual = filter_ProdByTechAn(input_data, technologies)
+        actual = filter_capacity(input_data, technologies)
 
         data = [
             ['AT', 2015, 26.324108350683794],
@@ -118,16 +154,14 @@ class TestEnergy:
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
 
-        index = ["REGION", "YEAR"]
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_bm(self):
         filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
         input_data = pd.read_csv(filepath)
 
         technologies = ['(?=^.{2}(BM))^.{4}(00)','(?=^.{2}(WS))^.{4}(00)']
-        actual = filter_ProdByTechAn(input_data, technologies)
+        actual = filter_capacity(input_data, technologies)
 
         data = [
             ['AT',2015,26.324108350683794],
@@ -139,16 +173,14 @@ class TestEnergy:
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
 
-        index = ["REGION", "YEAR"]
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_co(self):
         filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
         input_data = pd.read_csv(filepath)
 
         technologies = ['(?=^.{2}(CO))^.{4}(00)']
-        actual = filter_ProdByTechAn(input_data, technologies)
+        actual = filter_capacity(input_data, technologies)
 
         data = [
             ['CH',2047,69.9750212433476],
@@ -160,16 +192,14 @@ class TestEnergy:
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
 
-        index = ["REGION", "YEAR"]
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_ng(self):
         filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
         input_data = pd.read_csv(filepath)
 
         technologies = ['(?=^.{2}(NG))^.{4}(00)']
-        actual = filter_ProdByTechAn(input_data, technologies)
+        actual = filter_capacity(input_data, technologies)
 
         data = [
             ['BE',2016,141.0],
@@ -177,67 +207,56 @@ class TestEnergy:
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
 
-        index = ["REGION", "YEAR"]
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_go(self):
         filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
         input_data = pd.read_csv(filepath)
 
         technologies = ['(?=^.{2}(GO))^.{4}(00)']
-        actual = filter_ProdByTechAn(input_data, technologies)
+        actual = filter_capacity(input_data, technologies)
 
         data = [
             ['BG',2015,1.423512],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
-
-        index = ["REGION", "YEAR"]
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_hy(self):
         filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
         input_data = pd.read_csv(filepath)
 
         technologies = ['^.{2}(HY)']
-        actual = filter_ProdByTechAn(input_data, technologies)
+        actual = filter_capacity(input_data, technologies)
 
         data = [
             ['CZ',2015,3.3637616987287244],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
-
-        index = ["REGION", "YEAR"]
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_nu(self):
         filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
         input_data = pd.read_csv(filepath)
 
         technologies = ['^.{2}(UR)']
-        actual = filter_ProdByTechAn(input_data, technologies)
+        actual = filter_capacity(input_data, technologies)
 
         data = [
             ['CZ',2015,326.2313192401038],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
-
-        index = ["REGION", "YEAR"]
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_oc(self):
         filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
         input_data = pd.read_csv(filepath)
 
         technologies = ['^.{2}(OC)']
-        actual = filter_ProdByTechAn(input_data, technologies)
+        actual = filter_capacity(input_data, technologies)
 
         data = [
             ['DK',2015,0.0031536000000000003],
@@ -245,16 +264,14 @@ class TestEnergy:
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
 
-        index = ["REGION", "YEAR"]
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_oi(self):
         filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
         input_data = pd.read_csv(filepath)
 
         technologies = ['(?=^.{2}(OI))^.{4}(00)','(?=^.{2}(HF))^.{4}(00)']
-        actual = filter_ProdByTechAn(input_data, technologies)
+        actual = filter_capacity(input_data, technologies)
 
         data = [
             ['EE',2015,28.512107999999998],
@@ -262,16 +279,14 @@ class TestEnergy:
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
 
-        index = ["REGION", "YEAR"]
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_so(self):
         filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
         input_data = pd.read_csv(filepath)
 
         technologies = ['^.{2}(SO)']
-        actual = filter_ProdByTechAn(input_data, technologies)
+        actual = filter_capacity(input_data, technologies)
 
         data = [
             ['ES',2015,26.75595496070811],
@@ -279,16 +294,14 @@ class TestEnergy:
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
 
-        index = ["REGION", "YEAR"]
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_wi(self):
         filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
         input_data = pd.read_csv(filepath)
 
         technologies = ['^.{2}(WI)']
-        actual = filter_ProdByTechAn(input_data, technologies)
+        actual = filter_capacity(input_data, technologies)
 
         data = [
             ['FI', 2015, 0.29658110158442175],
@@ -297,16 +310,14 @@ class TestEnergy:
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
 
-        index = ["REGION", "YEAR"]
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_secondary_bm(self):
         filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
         input_data = pd.read_csv(filepath)
 
         technologies = ['(?=^.{2}(BF))^((?!00).)*$','(?=^.{2}(BM))^((?!00).)*$', '(?=^.{2}(WS))^((?!00).)*$']
-        actual = filter_ProdByTechAn(input_data, technologies)
+        actual = filter_capacity(input_data, technologies)
 
         data = [
             ['AT', 2042, 0.6636346353894057],
@@ -318,9 +329,7 @@ class TestEnergy:
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
 
-        index = ["REGION", "YEAR"]
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_final_energy(self):
         filepath = os.path.join("tests","fixtures","Demand.csv")
@@ -336,9 +345,10 @@ class TestEnergy:
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
-        index = ["REGION", "YEAR"]
+        print(actual)
+        print(expected)
 
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_fuels_format_wrong(self):
         filepath = os.path.join("tests","fixtures","Demand.csv")
@@ -374,9 +384,11 @@ class TestCapacity:
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
-        index = ["REGION", "YEAR"]
+        print(actual)
 
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        print(expected)
+
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_inst_capacity_bio(self):
         filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
@@ -392,9 +404,7 @@ class TestCapacity:
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
-        index = ["REGION", "YEAR"]
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_inst_capacity_coal(self):
         filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
@@ -408,9 +418,7 @@ class TestCapacity:
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
-        index = ["REGION", "YEAR"]
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_inst_capacity_gas(self):
         filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
@@ -424,9 +432,7 @@ class TestCapacity:
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
-        index = ["REGION", "YEAR"]
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_inst_capacity_geo(self):
         filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
@@ -440,9 +446,7 @@ class TestCapacity:
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
-        index = ["REGION", "YEAR"]
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_inst_capacity_hydro(self):
         filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
@@ -456,9 +460,7 @@ class TestCapacity:
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
-        index = ["REGION", "YEAR"]
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_inst_capacity_nuclear(self):
         filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
@@ -472,9 +474,7 @@ class TestCapacity:
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
-        index = ["REGION", "YEAR"]
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_inst_capacity_ocean(self):
         filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
@@ -488,9 +488,7 @@ class TestCapacity:
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
-        index = ["REGION", "YEAR"]
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_inst_capacity_oil(self):
         filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
@@ -504,9 +502,7 @@ class TestCapacity:
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
-        index = ["REGION", "YEAR"]
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_inst_capacity_solar(self):
         filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
@@ -520,9 +516,7 @@ class TestCapacity:
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
-        index = ["REGION", "YEAR"]
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_inst_capacity_wi_offshore(self):
         filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
@@ -536,9 +530,7 @@ class TestCapacity:
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
-        index = ["REGION", "YEAR"]
-
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
 
 class TestPrice:
 
@@ -546,17 +538,18 @@ class TestPrice:
         filepath = os.path.join("tests","fixtures","VariableCost.csv")
         input_data = pd.read_csv(filepath)
         commodity = ['(?=^.{2}(BM))^.{6}(X0)']
-        actual = filter_var_cost(input_data, commodity)
+        actual = filter_capacity(input_data, commodity)
 
         data = [
-            ['AT',2015,2.327755063],
-            ['AT',2016,2.327755063],
-            ['BE',2015,2.327755063],
-            ['BE',2016,2.327755063],
+            ['AT',2015,3.0],
+            ['AT',2016,4.0],
+            ['BE',2015,1.7],
+            ['BE',2016,1.8],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
 
-        index = ["REGION", "YEAR"]
+        print(actual)
+        print(expected)
 
-        pd.testing.assert_frame_equal(actual.set_index(index), expected.set_index(index), check_index_type=False)
+        pd.testing.assert_frame_equal(actual, expected)
