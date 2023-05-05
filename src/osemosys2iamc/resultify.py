@@ -13,8 +13,6 @@ where:
 
 """
 import functools
-from multiprocessing.sharedctypes import Value
-from sqlite3 import DatabaseError
 import pandas as pd
 import pyam
 from openentrance import iso_mapping
@@ -32,6 +30,7 @@ def read_file(filename) -> pd.DataFrame:
 
     return df
 
+
 def filter_regex(df: pd.DataFrame, patterns: List[str], column: str) -> pd.DataFrame:
     """Generic filtering of rows based on columns that match a list of patterns
 
@@ -40,6 +39,7 @@ def filter_regex(df: pd.DataFrame, patterns: List[str], column: str) -> pd.DataF
     """
     masks = [df[column].str.match(p) for p in patterns]
     return pd.concat([df[mask] for mask in masks])
+
 
 def filter_fuels(df: pd.DataFrame, fuels: List[str]) -> pd.DataFrame:
     """Returns rows which match list of regex patterns in ``technologies``
@@ -53,6 +53,7 @@ def filter_fuels(df: pd.DataFrame, fuels: List[str]) -> pd.DataFrame:
     """
     return filter_regex(df, fuels, 'FUEL')
 
+
 def filter_technologies(df: pd.DataFrame, technologies: List[str]) -> pd.DataFrame:
     """Returns rows which match list of regex patterns in ``technologies``
 
@@ -65,16 +66,19 @@ def filter_technologies(df: pd.DataFrame, technologies: List[str]) -> pd.DataFra
     """
     return filter_regex(df, technologies, 'TECHNOLOGY')
 
+
 def filter_technology_fuel(df: pd.DataFrame, technologies: List, fuels: List) -> pd.DataFrame:
     """Return rows which match ``technologies`` and ``fuels``
     """
     df = filter_technologies(df, technologies)
     df = filter_fuels(df, fuels)
 
-    df = df.groupby(by=['REGION','YEAR'], as_index=False)["VALUE"].sum()
+    df = df.groupby(by=['REGION', 'YEAR'], as_index=False)["VALUE"].sum()
     return df[df.VALUE != 0]
 
-def filter_emission_tech(df: pd.DataFrame, emission: List[str], technologies: Optional[List[str]]=None) -> pd.DataFrame:
+
+def filter_emission_tech(df: pd.DataFrame, emission: List[str],
+                         technologies: Optional[List[str]] = None) -> pd.DataFrame:
     """Return annual emissions or captured emissions by one or several technologies.
 
     Parameters
@@ -90,14 +94,19 @@ def filter_emission_tech(df: pd.DataFrame, emission: List[str], technologies: Op
     pandas.DataFrame
     """
 
-    df['REGION'] = df['TECHNOLOGY'].str[:2]
+    # Try to extract region from technology
+    try:
+        df['REGION'] = df['TECHNOLOGY'].str[:2]
+    except KeyError:
+        # No Technology column
+        pass
     df = filter_regex(df, emission, 'EMISSION')
 
     if technologies:
-    # Create a list of masks, one for each row that matches the pattern listed in ``tech``
+        # Create a list of masks, one for each row that matches the pattern listed in ``tech``
         df = filter_technologies(df, technologies)
 
-    df = df.groupby(by=['REGION','YEAR'], as_index=False)["VALUE"].sum()
+    df = df.groupby(by=['REGION', 'YEAR'], as_index=False)["VALUE"].sum()
     return df[df.VALUE != 0]
 
 def filter_capacity(df: pd.DataFrame, technologies: List[str]) -> pd.DataFrame:

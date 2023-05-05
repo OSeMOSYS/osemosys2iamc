@@ -553,3 +553,34 @@ class TestPrice:
         print(expected)
 
         pd.testing.assert_frame_equal(actual, expected)
+
+class TestCarbonPrice:
+
+    def test_carbon_price(self):
+        """
+        VALUE,constraint,REGION,EMISSION,YEAR
+        -0.011043939576413982,Constr E8_AnnualEmissionsLimit,REGION1,CO2,2036
+        -0.013899709405226217,Constr E8_AnnualEmissionsLimit,REGION1,CO2,2037
+        -0.014572746545426708,Constr E8_AnnualEmissionsLimit,REGION1,CO2,2038
+        -0.011609757344217923,Constr E8_AnnualEmissionsLimit,REGION1,CO2,2039
+        0.0,Constr E8_AnnualEmissionsLimit,REGION1,UKWO,2060
+        """
+
+        filepath = os.path.join("tests","fixtures","carbonprice.csv")
+        input_data = pd.read_csv(filepath)
+        emission = ['CO2']
+        actual = filter_emission_tech(input_data, emission)
+
+        data = [
+            ['REGION1',2036,-0.011043939576413982],
+            ['REGION1',2037,-0.013899709405226217],
+            ['REGION1',2038,-0.014572746545426708],
+            ['REGION1',2039,-0.011609757344217923],
+        ]
+
+        expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
+
+        print(actual)
+        print(expected)
+
+        pd.testing.assert_frame_equal(actual, expected)
