@@ -2,6 +2,10 @@
 
 Convert OSeMOSYS results to IAMC format
 
+## Acknowledgements
+
+This work was financially supported by the European Union’s Horizon 2020 research and innovation programme under the grant agreement No 101022622 ([European Climate and Energy Modelling Forum ECEMF](https://doi.org/10.3030/101022622)).
+
 ## Install from Github repository
 
 It is currently necessary to install the OpenEntrance dependency as an editable installation.
