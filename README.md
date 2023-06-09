@@ -11,8 +11,8 @@ This work was financially supported by the European Union’s Horizon 2020 resea
 It is currently necessary to install the OpenEntrance dependency as an editable installation.
 See [issue](https://github.com/openENTRANCE/openentrance/issues/202)
 
-    pip install git+https://github.com/osemosys/osemosys2iamc@main#egg=osemosys2iamc
     pip install -e git+https://github.com/openENTRANCE/openentrance.git@main#egg=openentrance
+    pip install git+https://github.com/osemosys/osemosys2iamc@main#egg=osemosys2iamc
 
 ## Run the package
 
