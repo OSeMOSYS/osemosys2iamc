@@ -17,7 +17,7 @@ from multiprocessing.sharedctypes import Value
 from sqlite3 import DatabaseError
 import pandas as pd
 import pyam
-from openentrance import iso_mapping
+from isocodesconverter import iso2engshortname
 import sys
 import os
 from typing import List, Dict, Optional
@@ -26,9 +26,40 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
 
-def read_file(filename) -> pd.DataFrame:
+def read_file(in_path: str, osemosys_param: str, region_name_option: str) -> pd.DataFrame:
+    """Reads in selected csv file as given in the config file into a Pandas DataFrame
 
+    Also, at the time of DataFrame creation, this function checks how it should derive
+    the name of the region to be used
+
+    Options:
+        from-tech-name: Converts the first two characters of the technology/fuel to 
+                        the country's name
+        from-file: Uses the region specified in the CSV file
+        Otherwise, it will use the Country name that is given in the config file itself
+    """
+    rename_dict = {'r': 'REGION',
+                   't': 'TECHNOLOGY',
+                   'e': 'EMISSION',
+                   'y': 'YEAR',
+                   'f': 'FUEL',
+                   osemosys_param: 'VALUE'}
+
+    filename = os.path.join(in_path, osemosys_param + '.csv')
+    
     df = pd.read_csv(filename)
+    df.rename(columns=rename_dict, inplace=True)
+
+    if region_name_option == 'from-tech-name':
+        if 'FUEL' in df.columns:
+            df['REGION'] = iso2engshortname(df['FUEL'].str[:2], osemosys_param)
+            df['FUEL'] = df['FUEL'].str[2:]
+        elif 'TECHNOLOGY' in df.columns:
+            df['REGION'] = iso2engshortname(df['TECHNOLOGY'].str[:2], osemosys_param)
+    elif region_name_option == 'from-file':
+        df['REGION'] = df['REGION']
+    else:
+        df['REGION'] = region_name_option
 
     return df
 
@@ -88,9 +119,8 @@ def filter_emission_tech(df: pd.DataFrame, emission: List[str], technologies: Op
     Returns
     -------
     pandas.DataFrame
-    """
+    """    
 
-    df['REGION'] = df['TECHNOLOGY'].str[:2]
     df = filter_regex(df, emission, 'EMISSION')
 
     if technologies:
@@ -114,7 +144,6 @@ def filter_capacity(df: pd.DataFrame, technologies: List[str]) -> pd.DataFrame:
     -------
     pandas.DataFrame
     """
-    df['REGION'] = df['TECHNOLOGY'].str[:2]
     df = filter_technologies(df, technologies)
 
     df = df.groupby(by=['REGION','YEAR'], as_index=False)["VALUE"].sum()
@@ -128,9 +157,6 @@ def filter_final_energy(df: pd.DataFrame, fuels: List) -> pd.DataFrame:
             print("Fuel %s from config.yaml doesn't comply with expected format." % f)
             exit(1)
 
-    df['REGION'] = df['FUEL'].str[:2]
-
-    df['FUEL'] = df['FUEL'].str[2:]
     df_f = filter_fuels(df, fuels)
 
     df = df_f.groupby(by=['REGION','YEAR'], as_index=False)["VALUE"].sum()
@@ -254,8 +280,7 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
     try:
         for input in config['inputs']:
 
-            inpathname = os.path.join(inputs_path, input['osemosys_param'] + '.csv')
-            inputs = read_file(inpathname)
+            inputs = read_file(inputs_path, input['osemosys_param'], config['region'])
 
             unit = input['unit']
 
@@ -280,8 +305,8 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
         for result in config['results']:
 
             if type(result['osemosys_param']) == str:
-                path_name = os.path.join(results_path, result['osemosys_param'] + '.csv')
-                results = read_file(path_name)
+                results = read_file(results_path, result['osemosys_param'], config['region'])
+                print(results)
 
                 try:
                     technologies = result['technology']
@@ -336,7 +361,7 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
                 data = data.rename(columns={'REGION': 'region',
                                             'YEAR': 'year',
                                             'VALUE': 'value'})
-                # print(data)
+
                 iamc = pyam.IamDataFrame(
                     data,
                     model=config['model'],
@@ -353,15 +378,6 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
     all_data = all_data.convert_unit('ktCO2/yr', to='Mt CO2/yr', factor=0.001)
     all_data = all_data.convert_unit('MEUR_2015/PJ', to='EUR_2020/GJ', factor=1.05)
     all_data = all_data.convert_unit('kt CO2/yr', to='Mt CO2/yr')
-
-    if iso_mapping is not None:
-        data = all_data.timeseries()
-        data.index = data.index.set_levels(data.index.levels[2].map(iso_mapping), level=2)
-        all_data = pyam.IamDataFrame(data)
-    else:
-        msg = "Please ensure that the openentrance package is installed as an editable library " \
-              "See https://github.com/openENTRANCE/openentrance/issues/202"
-        raise ValueError(msg)
 
     all_data = pyam.IamDataFrame(all_data)
     return all_data
