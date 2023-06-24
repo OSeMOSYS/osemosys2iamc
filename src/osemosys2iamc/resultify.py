@@ -17,46 +17,110 @@ from multiprocessing.sharedctypes import Value
 from sqlite3 import DatabaseError
 import pandas as pd
 import pyam
-from isocodesconverter import iso2engshortname
+from iso3166 import countries_by_alpha2, countries_by_alpha3, countries_by_name
 import sys
 import os
 from typing import List, Dict, Optional
 from yaml import load, SafeLoader
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import re
 
+def iso2country(iso_format: str, index: List[str], osemosys_param: str):
+    """Reads in selected CSV file and applies chosen region
+    naming convention as given in the config file into a Pandas DataFrame
 
-def read_file(in_path: str, osemosys_param: str, region_name_option: str) -> pd.DataFrame:
-    """Reads in selected csv file as given in the config file into a Pandas DataFrame
+    Parameters
+    ----------
+    iso_format: str
+        Extraction format from technology/fuel name based on iso2 or iso3 and where the code is located
+    index: List[str]
+        List of technologies/fuels
+    osemosys_param: str
+        Name of csv file
 
-    Also, at the time of DataFrame creation, this function checks how it should derive
-    the name of the region to be used
-
-    Options:
-        from-tech-name: Converts the first two characters of the technology/fuel to 
-                        the country's name
-        from-file: Uses the region specified in the CSV file
-        Otherwise, it will use the Country name that is given in the config file itself
+    Returns
+    -------
+    List[str]
     """
-    rename_dict = {'r': 'REGION',
-                   't': 'TECHNOLOGY',
-                   'e': 'EMISSION',
-                   'y': 'YEAR',
-                   'f': 'FUEL',
-                   osemosys_param: 'VALUE'}
+    countries_list = []
+    no_country_extracted = []
+    iso_type, abbr_loc = iso_format[3:].split('_')
 
-    filename = os.path.join(in_path, osemosys_param + '.csv')
-    
+    if abbr_loc == 'start':
+        region_regex2 = r'^(.{2}).*$'
+        region_regex3 = r'^(.{3}).*$'
+    elif abbr_loc == 'end':
+        region_regex2 = r'^.*(.{2})$'
+        region_regex3 = r'^.*(.{3})$'
+    elif abbr_loc.isnumeric:
+        region_regex2 = r'^.{' + str(int(abbr_loc)-1) + r'}(.{2}).*$'
+        region_regex3 = r'^.{' + str(int(abbr_loc)-1) + r'}(.{3}).*$'
+    else:
+        print('Valid abbreviation locations are \'start\', \'end\', and a positive number denoting the start of the abbreviation in the string. Kindly try again.')
+        exit(1)
+
+    if iso_type == '2':
+        for i in index:
+            if re.search(region_regex2, i) != None:
+                code = re.search(region_regex2, i).groups()[0]
+                if code in countries_by_alpha2:
+                    countries_list.append(countries_by_alpha2[code].name.upper())
+                else:
+                    countries_list.append("")
+                    no_country_extracted.append(i)
+            else:
+                countries_list.append("")
+                no_country_extracted.append(i)
+    elif iso_type == '3':
+        for i in index:
+            if re.search(region_regex3, i) != None:
+                code = re.search(region_regex3, i).groups()[0]
+                if code in countries_by_alpha3:
+                    countries_list.append(countries_by_alpha3[code].name.upper())
+                else:
+                    countries_list.append("")
+                    no_country_extracted.append(i)
+            else:
+                countries_list.append("")
+                no_country_extracted.append(i)
+    else:
+        print('Invalid ISO type. Kindly check your region naming option.')
+        exit(1)
+
+    if len(no_country_extracted) > 0:
+        print(f'Countries were not found from the following technologies/fuels: {set(no_country_extracted)}')
+        print(f'Kindly check your region naming option or the technology/fuel names in file: {osemosys_param}.\n')
+                    
+    return countries_list
+
+def read_file(path: str, osemosys_param: str, region_name_option: str) -> pd.DataFrame:
+    """Reads in selected CSV file and applies chosen region
+    naming convention as given in the config file into a Pandas DataFrame
+
+    Parameters
+    ----------
+    path: str
+        Path to a folder of csv files (OSeMOSYS inputs/outputs)
+    osemosys_param: str
+        Name of csv file
+    region_name_option: str
+        Description of how the region is encoded in technology/fuel names and how it can be extracted
+
+    Returns
+    -------
+    pandas.DataFrame
+    """
+
+    filename = os.path.join(path, osemosys_param + '.csv')
     df = pd.read_csv(filename)
-    df.rename(columns=rename_dict, inplace=True)
 
-    if region_name_option == 'from-tech-name':
+    if 'iso' in region_name_option:
         if 'FUEL' in df.columns:
-            df['REGION'] = iso2engshortname(df['FUEL'].str[:2], osemosys_param)
-            df['FUEL'] = df['FUEL'].str[2:]
+            df['REGION'] = iso2country(region_name_option, df['FUEL'], osemosys_param)
         elif 'TECHNOLOGY' in df.columns:
-            df['REGION'] = iso2engshortname(df['TECHNOLOGY'].str[:2], osemosys_param)
-    elif region_name_option == 'from-file':
+            df['REGION'] = iso2country(region_name_option, df['TECHNOLOGY'], osemosys_param)
+    elif region_name_option == 'from_csv':
         df['REGION'] = df['REGION']
     else:
         df['REGION'] = region_name_option
@@ -152,10 +216,10 @@ def filter_capacity(df: pd.DataFrame, technologies: List[str]) -> pd.DataFrame:
 def filter_final_energy(df: pd.DataFrame, fuels: List) -> pd.DataFrame:
     """Return dataframe that indicate the final energy demand/use per country and year.
     """
-    for f in fuels:
-        if len(f)!=2:
-            print("Fuel %s from config.yaml doesn't comply with expected format." % f)
-            exit(1)
+    #for f in fuels:
+    #    if len(f)!=2:
+    #        print("Fuel %s from config.yaml doesn't comply with expected format." % f)
+    #        exit(1)
 
     df_f = filter_fuels(df, fuels)
 
@@ -179,7 +243,6 @@ def extract_results(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
     mask = df.TECHNOLOGY.isin(technologies)
 
     return df[mask]
-
 
 def load_config(filepath: str) -> Dict:
     """Reads the configuration file
@@ -306,7 +369,6 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
 
             if type(result['osemosys_param']) == str:
                 results = read_file(results_path, result['osemosys_param'], config['region'])
-                print(results)
 
                 try:
                     technologies = result['technology']
