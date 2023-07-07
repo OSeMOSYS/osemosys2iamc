@@ -9,7 +9,7 @@ where:
     ``input_path`` is the path to the folder of CSV files containing input files
     ``results_path`` is the path to the folder of CSV files holding OSeMOSYS results
     ``config_path`` is the path to the ``config.yaml`` file containing the results mapping
-    ``output_path`` is the path to the csv file written out in IAMC format
+    ``output_path`` is the path to the CSV file written out in IAMC format
 
 """
 import functools
@@ -17,7 +17,7 @@ from multiprocessing.sharedctypes import Value
 from sqlite3 import DatabaseError
 import pandas as pd
 import pyam
-from iso3166 import countries_by_alpha2, countries_by_alpha3, countries_by_name
+from iso3166 import countries_by_alpha2, countries_by_alpha3
 import sys
 import os
 from typing import List, Dict, Optional
@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import re
 
-def iso2country(iso_format: str, index: List[str], osemosys_param: str):
+def iso_to_country(iso_format: str, index: List[str], osemosys_param: str):
     """Reads in selected CSV file and applies chosen region
     naming convention as given in the config file into a Pandas DataFrame
 
@@ -37,7 +37,7 @@ def iso2country(iso_format: str, index: List[str], osemosys_param: str):
     index: List[str]
         List of technologies/fuels
     osemosys_param: str
-        Name of csv file
+        Name of CSV file
 
     Returns
     -------
@@ -45,51 +45,55 @@ def iso2country(iso_format: str, index: List[str], osemosys_param: str):
     """
     countries_list = []
     no_country_extracted = []
-    iso_type, abbr_loc = iso_format[3:].split('_')
+    format_regex = r'^iso[23]_([1-9]\d*|start|end)$'
 
-    if abbr_loc == 'start':
-        region_regex2 = r'^(.{2}).*$'
-        region_regex3 = r'^(.{3}).*$'
-    elif abbr_loc == 'end':
-        region_regex2 = r'^.*(.{2})$'
-        region_regex3 = r'^.*(.{3})$'
-    elif abbr_loc.isnumeric:
-        region_regex2 = r'^.{' + str(int(abbr_loc)-1) + r'}(.{2}).*$'
-        region_regex3 = r'^.{' + str(int(abbr_loc)-1) + r'}(.{3}).*$'
-    else:
-        print('Valid abbreviation locations are \'start\', \'end\', and a positive number denoting the start of the abbreviation in the string. Kindly try again.')
-        exit(1)
+    # Verifies that given format is the expected format; Raises an error if expectation not met
+    if re.search(format_regex, iso_format) != None:
 
-    if iso_type == '2':
+        iso_type, abbr_loc = iso_format[3:].split('_')
+
+        # Assigns the correct dictionary to search based on iso type
+        if iso_type == '2':
+            country_dict = countries_by_alpha2
+        elif iso_type == '3':
+            country_dict = countries_by_alpha3
+
+        # Creates the regex with the expected location of the ISO code
+        if abbr_loc == 'start':
+            region_regex = r'^(.{' + iso_type + r'}).*$'
+        elif abbr_loc == 'end':
+            region_regex = r'^.*(.{' + iso_type + r'})$'
+        elif abbr_loc.isnumeric:
+            region_regex = r'^.{' + str(int(abbr_loc)-1) + r'}(.{' + iso_type + r'}).*$'
+
+        """
+        Checks every technology/fuel name for a valid code. If found, 
+        adds that country to the list for that tech/fuel name, otherwise 
+        adds an empty string for that tech/fuel. A position exceeeding the
+        length of the name, adds an empty string instead
+        """
         for i in index:
-            if re.search(region_regex2, i) != None:
-                code = re.search(region_regex2, i).groups()[0]
-                if code in countries_by_alpha2:
-                    countries_list.append(countries_by_alpha2[code].name.upper())
+            if re.search(region_regex, i.upper()) != None:
+                code = re.search(region_regex, i.upper()).groups()[0]
+                if code in country_dict:
+                    countries_list.append(country_dict[code].name.upper())
                 else:
                     countries_list.append("")
                     no_country_extracted.append(i)
             else:
                 countries_list.append("")
                 no_country_extracted.append(i)
-    elif iso_type == '3':
-        for i in index:
-            if re.search(region_regex3, i) != None:
-                code = re.search(region_regex3, i).groups()[0]
-                if code in countries_by_alpha3:
-                    countries_list.append(countries_by_alpha3[code].name.upper())
-                else:
-                    countries_list.append("")
-                    no_country_extracted.append(i)
-            else:
-                countries_list.append("")
-                no_country_extracted.append(i)
-    else:
-        print('Invalid ISO type. Kindly check your region naming option.')
-        exit(1)
 
+    else:
+        raise ValueError('Invalid ISO type or abbreviation location. Valid locations are \'start\', \'end\', and a positive number denoting the start of the abbreviation in the string.')
+
+    """
+    If countries were not found, user is notified for which names and
+    in which CSV valid codes were not found. This may be intended by 
+    the user so the program is not halt and continues normally
+    """
     if len(no_country_extracted) > 0:
-        print(f'Countries were not found from the following technologies/fuels: {set(no_country_extracted)}')
+        print(f'Using the ISO option, Countries were not found from the following technologies/fuels: {set(no_country_extracted)}')
         print(f'Kindly check your region naming option or the technology/fuel names in file: {osemosys_param}.\n')
                     
     return countries_list
@@ -101,9 +105,9 @@ def read_file(path: str, osemosys_param: str, region_name_option: str) -> pd.Dat
     Parameters
     ----------
     path: str
-        Path to a folder of csv files (OSeMOSYS inputs/outputs)
+        Path to a folder of CSV files (OSeMOSYS inputs/outputs)
     osemosys_param: str
-        Name of csv file
+        Name of CSV file
     region_name_option: str
         Description of how the region is encoded in technology/fuel names and how it can be extracted
 
@@ -115,11 +119,18 @@ def read_file(path: str, osemosys_param: str, region_name_option: str) -> pd.Dat
     filename = os.path.join(path, osemosys_param + '.csv')
     df = pd.read_csv(filename)
 
+    """
+    Returns list of countries to REGION column based on option defined by the user
+    Anything other than a valid iso format or 'from_csv' will be accepted as the 
+    intended name of the region
+    """
     if 'iso' in region_name_option:
         if 'FUEL' in df.columns:
-            df['REGION'] = iso2country(region_name_option, df['FUEL'], osemosys_param)
+            df['REGION'] = iso_to_country(region_name_option, df['FUEL'], osemosys_param)
         elif 'TECHNOLOGY' in df.columns:
-            df['REGION'] = iso2country(region_name_option, df['TECHNOLOGY'], osemosys_param)
+            df['REGION'] = iso_to_country(region_name_option, df['TECHNOLOGY'], osemosys_param)
+        elif 'EMISSION' in df.columns:
+            df['REGION'] = iso_to_country(region_name_option, df['EMISSION'], osemosys_param)
     elif region_name_option == 'from_csv':
         df['REGION'] = df['REGION']
     else:
@@ -216,11 +227,6 @@ def filter_capacity(df: pd.DataFrame, technologies: List[str]) -> pd.DataFrame:
 def filter_final_energy(df: pd.DataFrame, fuels: List) -> pd.DataFrame:
     """Return dataframe that indicate the final energy demand/use per country and year.
     """
-    #for f in fuels:
-    #    if len(f)!=2:
-    #        print("Fuel %s from config.yaml doesn't comply with expected format." % f)
-    #        exit(1)
-
     df_f = filter_fuels(df, fuels)
 
     df = df_f.groupby(by=['REGION','YEAR'], as_index=False)["VALUE"].sum()
@@ -335,9 +341,9 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
     config : dict
         The configuration dictionary
     inputs_path: str
-        Path to a folder of csv files (OSeMOSYS inputs)
+        Path to a folder of CSV files (OSeMOSYS inputs)
     results_path: str
-        Path to a folder of csv files (OSeMOSYS results)
+        Path to a folder of CSV files (OSeMOSYS results)
     """
     blob = []
     try:

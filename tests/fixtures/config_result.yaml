@@ -1,6 +1,6 @@
 model: OSeMBE v1.0.0
 scenario: DIAG-C400-lin-ResidualFossil
-region: ['Austria'] #, 'Belgium', 'Bulgaria', 'Switzerland', 'Cyprus', 'Czech Republic', 'Germany', 'Denmark', 'Estonia', 'Spain', 'Finland', 'France', 'Greece', 'Croatia', 'Hungary', 'Ireland', 'Italy', 'Lithuania', 'Luxembourg', 'Latvia', 'Malta', 'The Netherlands', 'Norway', 'Poland', 'Portugal', 'Romania', 'Sweden', 'Slovenia', 'Slovakia', 'United Kingdom',]
+region: 'iso2_start' #iso2_x, iso3_x, from_csv, or a name of a country/region [substitute x with start, end, or a positive number]
 results:
 - iamc_variable: 'Capacity|Electricity'
   capacity: ['^((?!(EL)|(00)).)*$']
