@@ -42,20 +42,22 @@ for more information about the format and its usage in that project.
 
 Write a configuration file in YAML format. A simple configuration file with two result variables looks like this:
 
-    model: OSeMBE v1.0.0
-    scenario: DIAG-C400-lin-ResidualFossil
-    region: iso2_x, iso3_x, from_csv, or a name of a country/region [substitute x with start, end, or a positive number]
-    results:
-    - iamc_variable: 'Carbon Capture|Biomass'
-      tech_emi: ['(?=^.{2}(BM))^.{4}(CS)']
-      emissions: [CO2]
-      unit: kt CO2/yr
-      transform: abs
-      osemosys_param: AnnualTechnologyEmission
-    - iamc_variable: 'Capital Investment'
-      capacity: ['^.*$']
-      unit: MUSD
-      osemosys_param: CapitalInvestment
+```yaml
+model: OSeMBE v1.0.0
+scenario: DIAG-C400-lin-ResidualFossil
+region: iso2_x, iso3_x, from_csv, or a name of a country/region [substitute x with start, end, or a positive number]
+results:
+- iamc_variable: 'Carbon Capture|Biomass'
+  tech_emi: ['(?=^.{2}(BM))^.{4}(CS)']
+  emissions: [CO2]
+  unit: kt CO2/yr
+  transform: abs
+  osemosys_param: AnnualTechnologyEmission
+- iamc_variable: 'Capital Investment'
+  capacity: ['^.*$']
+  unit: MUSD
+  osemosys_param: CapitalInvestment
+```
 
 The first section of the configuration file with the keys `model`, `scenario`, and `region` are used to define the metadata for
 the IAMC template.
@@ -67,7 +69,7 @@ the IAMC template.
 * `from_csv` - using the region as defined in the REGION column of the CSV file
 * Any other word or phrase the user defines (other than an invalid iso option) will be used as the region for all variables. eg. Austria, Nepal, Ethiopia, Guyana, etc.
 
-\*The `x` in the above ISO options is to be replaced by:
+The `x` in the above ISO options is to be replaced by:
 * `start`, if the codes are at the beginning of the names
 * `end`, if the codes are at the end of the names, or
 * a positive number indicating the position of the first letter of the code in the name. eg. iso2_5 will target the 'GH' in 'POWRGHSOL'
