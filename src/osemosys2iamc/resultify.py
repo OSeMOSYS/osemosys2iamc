@@ -52,7 +52,7 @@ def iso_to_country(
     format_regex = r"^iso[23]_([1-9]\d*|start|end)$"
 
     # Verifies that given format is the expected format; Raises an error if expectation not met
-    if re.search(format_regex, iso_format) != None:
+    if re.search(format_regex, iso_format) is not None:
 
         iso_type, abbr_loc = iso_format[3:].split("_")
 
@@ -75,14 +75,14 @@ def iso_to_country(
         """
         Checks every technology/fuel name for a valid code. If found,
         adds that country to the list for that tech/fuel name, otherwise
-        adds an empty string for that tech/fuel. A position exceeeding the
+        adds an empty string for that tech/fuel. A position exceeding the
         length of the name, adds an empty string instead
         """
         for i in index:
             if re.search(region_regex, i.upper()) != None:
                 code = re.search(region_regex, i.upper()).groups()[0]
                 if code in country_dict:
-                    countries_list.append(country_dict[code].name.upper())
+                    countries_list.append(country_dict[code].name)
                 else:
                     countries_list.append("")
                     no_country_extracted.append(i)
@@ -431,7 +431,7 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
     try:
         for result in config["results"]:
 
-            if type(result["osemosys_param"]) == str:
+            if isinstance(result["osemosys_param"], str):
                 results = read_file(
                     results_path, result["osemosys_param"], config["region"]
                 )
@@ -470,14 +470,23 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
                 else:
                     data = extract_results(results, technologies)
 
-            else:
+            elif isinstance(result["osemosys_param"], list):
                 results = {}
                 for p in result["osemosys_param"]:
-                    path_name = os.path.join(results_path, p + ".csv")
-                    results[p] = read_file(path_name)
+                    results[p] = read_file(results_path, p, config["region"])
+
                 if "trade_tech" in result.keys():
                     technologies = result["trade_tech"]
                     data = calculate_trade(results, technologies)
+
+                else:
+                    name = result["iamc_variable"]
+                    raise ValueError(f"No data found for {name}")
+
+            else:
+                name = result["iamc_variable"]
+                msg = f"Error in configuration file for entry {name}. The `osemosys_param` key must be a string or a list"
+                raise ValueError(msg)
 
             if "transform" in result.keys():
                 if result["transform"] == "abs":
