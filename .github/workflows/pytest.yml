@@ -16,9 +16,12 @@ jobs:
         os:
         - ubuntu-latest
         python-version:
+        - '3.8'
+        - '3.9'
         - '3.10'
+        - '3.11'
 
-      fail-fast: false
+      fail-fast: true
 
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.os }} py${{ matrix.python-version }}
@@ -31,14 +34,12 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install pytest
+    - name: Install tox
       run: |
-        pip install pytest
-        pip install pytest-cov
+        pip install tox
 
-    - name: Install the package
-      run: |
-        pip install .
+    - name: Lint with tox
+      run: tox -e lint
 
-    - name: Test with pytest
-      run: pytest
+    - name: Test with tox
+      run: tox
