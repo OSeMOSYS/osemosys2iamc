@@ -26,9 +26,13 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import re
 
-def iso_to_country(iso_format: str, index: List[str], osemosys_param: str):
-    """Reads in selected CSV file and applies chosen region
-    naming convention as given in the config file into a Pandas DataFrame
+
+def iso_to_country(
+    iso_format: str, index: List[str], osemosys_param: str
+) -> pd.DataFrame:
+    """Reads in selected CSV file and applies chosen region naming convention
+
+    Uses naming convention as given in the config file into a Pandas DataFrame
 
     Parameters
     ----------
@@ -45,30 +49,32 @@ def iso_to_country(iso_format: str, index: List[str], osemosys_param: str):
     """
     countries_list = []
     no_country_extracted = []
-    format_regex = r'^iso[23]_([1-9]\d*|start|end)$'
+    format_regex = r"^iso[23]_([1-9]\d*|start|end)$"
 
     # Verifies that given format is the expected format; Raises an error if expectation not met
     if re.search(format_regex, iso_format) != None:
 
-        iso_type, abbr_loc = iso_format[3:].split('_')
+        iso_type, abbr_loc = iso_format[3:].split("_")
 
         # Assigns the correct dictionary to search based on iso type
-        if iso_type == '2':
+        if iso_type == "2":
             country_dict = countries_by_alpha2
-        elif iso_type == '3':
+        elif iso_type == "3":
             country_dict = countries_by_alpha3
 
         # Creates the regex with the expected location of the ISO code
-        if abbr_loc == 'start':
-            region_regex = r'^(.{' + iso_type + r'}).*$'
-        elif abbr_loc == 'end':
-            region_regex = r'^.*(.{' + iso_type + r'})$'
+        if abbr_loc == "start":
+            region_regex = r"^(.{" + iso_type + r"}).*$"
+        elif abbr_loc == "end":
+            region_regex = r"^.*(.{" + iso_type + r"})$"
         elif abbr_loc.isnumeric:
-            region_regex = r'^.{' + str(int(abbr_loc)-1) + r'}(.{' + iso_type + r'}).*$'
+            region_regex = (
+                r"^.{" + str(int(abbr_loc) - 1) + r"}(.{" + iso_type + r"}).*$"
+            )
 
         """
-        Checks every technology/fuel name for a valid code. If found, 
-        adds that country to the list for that tech/fuel name, otherwise 
+        Checks every technology/fuel name for a valid code. If found,
+        adds that country to the list for that tech/fuel name, otherwise
         adds an empty string for that tech/fuel. A position exceeeding the
         length of the name, adds an empty string instead
         """
@@ -85,18 +91,25 @@ def iso_to_country(iso_format: str, index: List[str], osemosys_param: str):
                 no_country_extracted.append(i)
 
     else:
-        raise ValueError('Invalid ISO type or abbreviation location. Valid locations are \'start\', \'end\', and a positive number denoting the start of the abbreviation in the string.')
+        raise ValueError(
+            "Invalid ISO type or abbreviation location. Valid locations are 'start', 'end', and a positive number denoting the start of the abbreviation in the string."
+        )
 
     """
     If countries were not found, user is notified for which names and
-    in which CSV valid codes were not found. This may be intended by 
+    in which CSV valid codes were not found. This may be intended by
     the user so the program is not halt and continues normally
     """
     if len(no_country_extracted) > 0:
-        print(f'Using the ISO option, Countries were not found from the following technologies/fuels: {set(no_country_extracted)}')
-        print(f'Kindly check your region naming option or the technology/fuel names in file: {osemosys_param}.\n')
-                    
+        print(
+            f"Using the ISO option, Countries were not found from the following technologies/fuels: {set(no_country_extracted)}"
+        )
+        print(
+            f"Kindly check your region naming option or the technology/fuel names in file: {osemosys_param}.\n"
+        )
+
     return countries_list
+
 
 def read_file(path: str, osemosys_param: str, region_name_option: str) -> pd.DataFrame:
     """Reads in selected CSV file and applies chosen region
@@ -116,27 +129,34 @@ def read_file(path: str, osemosys_param: str, region_name_option: str) -> pd.Dat
     pandas.DataFrame
     """
 
-    filename = os.path.join(path, osemosys_param + '.csv')
+    filename = os.path.join(path, osemosys_param + ".csv")
     df = pd.read_csv(filename)
 
     """
     Returns list of countries to REGION column based on option defined by the user
-    Anything other than a valid iso format or 'from_csv' will be accepted as the 
+    Anything other than a valid iso format or 'from_csv' will be accepted as the
     intended name of the region
     """
-    if 'iso' in region_name_option:
-        if 'FUEL' in df.columns:
-            df['REGION'] = iso_to_country(region_name_option, df['FUEL'], osemosys_param)
-        elif 'TECHNOLOGY' in df.columns:
-            df['REGION'] = iso_to_country(region_name_option, df['TECHNOLOGY'], osemosys_param)
-        elif 'EMISSION' in df.columns:
-            df['REGION'] = iso_to_country(region_name_option, df['EMISSION'], osemosys_param)
-    elif region_name_option == 'from_csv':
-        df['REGION'] = df['REGION']
+    if "iso" in region_name_option:
+        if "FUEL" in df.columns:
+            df["REGION"] = iso_to_country(
+                region_name_option, df["FUEL"], osemosys_param
+            )
+        elif "TECHNOLOGY" in df.columns:
+            df["REGION"] = iso_to_country(
+                region_name_option, df["TECHNOLOGY"], osemosys_param
+            )
+        elif "EMISSION" in df.columns:
+            df["REGION"] = iso_to_country(
+                region_name_option, df["EMISSION"], osemosys_param
+            )
+    elif region_name_option == "from_csv":
+        df["REGION"] = df["REGION"]
     else:
-        df['REGION'] = region_name_option
+        df["REGION"] = region_name_option
 
     return df
+
 
 def filter_regex(df: pd.DataFrame, patterns: List[str], column: str) -> pd.DataFrame:
     """Generic filtering of rows based on columns that match a list of patterns
@@ -146,6 +166,7 @@ def filter_regex(df: pd.DataFrame, patterns: List[str], column: str) -> pd.DataF
     """
     masks = [df[column].str.match(p) for p in patterns]
     return pd.concat([df[mask] for mask in masks])
+
 
 def filter_fuels(df: pd.DataFrame, fuels: List[str]) -> pd.DataFrame:
     """Returns rows which match list of regex patterns in ``technologies``
@@ -157,7 +178,8 @@ def filter_fuels(df: pd.DataFrame, fuels: List[str]) -> pd.DataFrame:
     fuels: List[str]
         List of regex patterns
     """
-    return filter_regex(df, fuels, 'FUEL')
+    return filter_regex(df, fuels, "FUEL")
+
 
 def filter_technologies(df: pd.DataFrame, technologies: List[str]) -> pd.DataFrame:
     """Returns rows which match list of regex patterns in ``technologies``
@@ -169,18 +191,23 @@ def filter_technologies(df: pd.DataFrame, technologies: List[str]) -> pd.DataFra
     technologies: List[str]
         List of regex patterns
     """
-    return filter_regex(df, technologies, 'TECHNOLOGY')
+    return filter_regex(df, technologies, "TECHNOLOGY")
 
-def filter_technology_fuel(df: pd.DataFrame, technologies: List, fuels: List) -> pd.DataFrame:
-    """Return rows which match ``technologies`` and ``fuels``
-    """
+
+def filter_technology_fuel(
+    df: pd.DataFrame, technologies: List, fuels: List
+) -> pd.DataFrame:
+    """Return rows which match ``technologies`` and ``fuels``"""
     df = filter_technologies(df, technologies)
     df = filter_fuels(df, fuels)
 
-    df = df.groupby(by=['REGION','YEAR'], as_index=False)["VALUE"].sum()
+    df = df.groupby(by=["REGION", "YEAR"], as_index=False)["VALUE"].sum()
     return df[df.VALUE != 0]
 
-def filter_emission_tech(df: pd.DataFrame, emission: List[str], technologies: Optional[List[str]]=None) -> pd.DataFrame:
+
+def filter_emission_tech(
+    df: pd.DataFrame, emission: List[str], technologies: Optional[List[str]] = None
+) -> pd.DataFrame:
     """Return annual emissions or captured emissions by one or several technologies.
 
     Parameters
@@ -194,16 +221,17 @@ def filter_emission_tech(df: pd.DataFrame, emission: List[str], technologies: Op
     Returns
     -------
     pandas.DataFrame
-    """    
+    """
 
-    df = filter_regex(df, emission, 'EMISSION')
+    df = filter_regex(df, emission, "EMISSION")
 
     if technologies:
-    # Create a list of masks, one for each row that matches the pattern listed in ``tech``
+        # Create a list of masks, one for each row that matches the pattern listed in ``tech``
         df = filter_technologies(df, technologies)
 
-    df = df.groupby(by=['REGION','YEAR'], as_index=False)["VALUE"].sum()
+    df = df.groupby(by=["REGION", "YEAR"], as_index=False)["VALUE"].sum()
     return df[df.VALUE != 0]
+
 
 def filter_capacity(df: pd.DataFrame, technologies: List[str]) -> pd.DataFrame:
     """Return aggregated rows filtered on technology column.
@@ -221,34 +249,39 @@ def filter_capacity(df: pd.DataFrame, technologies: List[str]) -> pd.DataFrame:
     """
     df = filter_technologies(df, technologies)
 
-    df = df.groupby(by=['REGION','YEAR'], as_index=False)["VALUE"].sum()
+    df = df.groupby(by=["REGION", "YEAR"], as_index=False)["VALUE"].sum()
     return df[df.VALUE != 0]
+
 
 def filter_final_energy(df: pd.DataFrame, fuels: List) -> pd.DataFrame:
-    """Return dataframe that indicate the final energy demand/use per country and year.
-    """
+    """Return dataframe that indicate the final energy demand/use per country and year."""
     df_f = filter_fuels(df, fuels)
 
-    df = df_f.groupby(by=['REGION','YEAR'], as_index=False)["VALUE"].sum()
+    df = df_f.groupby(by=["REGION", "YEAR"], as_index=False)["VALUE"].sum()
     return df[df.VALUE != 0]
 
-def calculate_trade(results: dict, techs: List) -> pd.DataFrame:
-    """Return dataframe with the net exports of a commodity
-    """
 
-    exports = filter_capacity(results['UseByTechnology'], techs).set_index(['REGION', 'YEAR'])
-    imports = filter_capacity(results['ProductionByTechnologyAnnual'], techs).set_index(['REGION', 'YEAR'])
+def calculate_trade(results: dict, techs: List) -> pd.DataFrame:
+    """Return dataframe with the net exports of a commodity"""
+
+    exports = filter_capacity(results["UseByTechnology"], techs).set_index(
+        ["REGION", "YEAR"]
+    )
+    imports = filter_capacity(results["ProductionByTechnologyAnnual"], techs).set_index(
+        ["REGION", "YEAR"]
+    )
     df = exports.subtract(imports, fill_value=0)
 
     return df.reset_index()
 
+
 def extract_results(df: pd.DataFrame, technologies: List) -> pd.DataFrame:
-    """Return rows which match ``technologies``
-    """
+    """Return rows which match ``technologies``"""
 
     mask = df.TECHNOLOGY.isin(technologies)
 
     return df[mask]
+
 
 def load_config(filepath: str) -> Dict:
     """Reads the configuration file
@@ -258,9 +291,10 @@ def load_config(filepath: str) -> Dict:
     filepath : str
         The path to the config file
     """
-    with open(filepath, 'r') as configfile:
+    with open(filepath, "r") as configfile:
         config = load(configfile, Loader=SafeLoader)
     return config
+
 
 def make_plots(df: pyam.IamDataFrame, model: str, scenario: str, regions: List[str]):
     """Creates standard plots
@@ -287,46 +321,69 @@ def make_plots(df: pyam.IamDataFrame, model: str, scenario: str, regions: List[s
         assert isinstance(region, str)
         print(f"Plotting {region}")
         # Plot primary energy
-        data = df.filter(**args, variable='Primary Energy|*', region=region) # type: pyam.IamDataFrame
+        data = df.filter(
+            **args, variable="Primary Energy|*", region=region
+        )  # type: pyam.IamDataFrame
         if data:
             print(data)
             locator = mdates.AutoDateLocator(minticks=10)
-            #locator.intervald['YEARLY'] = [10]
-            data.plot.bar(ax=ax, stacked=True, title='Primary energy mix %s' % region)
-            plt.legend(bbox_to_anchor=(0.,-0.5), loc='upper left')
+            # locator.intervald['YEARLY'] = [10]
+            data.plot.bar(ax=ax, stacked=True, title="Primary energy mix %s" % region)
+            plt.legend(bbox_to_anchor=(0.0, -0.5), loc="upper left")
             plt.tight_layout()
             ax.xaxis.set_major_locator(locator)
-            fig.savefig('primary_energy_%s.pdf' % region, bbox_inches='tight', transparent=True, pad_inches=0)
+            fig.savefig(
+                "primary_energy_%s.pdf" % region,
+                bbox_inches="tight",
+                transparent=True,
+                pad_inches=0,
+            )
             plt.clf()
         # Plot secondary energy (electricity generation)
-        se = df.filter(**args, variable='Secondary Energy|Electricity|*', region=region)
+        se = df.filter(**args, variable="Secondary Energy|Electricity|*", region=region)
         if se:
             locator = mdates.AutoDateLocator(minticks=10)
-            #locator.intervald['YEARLY'] = [10]
-            pe.plot.bar(ax=ax, stacked=True, title='Power generation mix %s' % region)
-            plt.legend(bbox_to_anchor=(0.,-0.5), loc='upper left')
+            # locator.intervald['YEARLY'] = [10]
+            pe.plot.bar(ax=ax, stacked=True, title="Power generation mix %s" % region)
+            plt.legend(bbox_to_anchor=(0.0, -0.5), loc="upper left")
             plt.tight_layout()
             ax.xaxis.set_major_locator(locator)
-            fig.savefig('electricity_generation_%s.pdf' % region, bbox_inches='tight', transparent=True, pad_inches=0)
+            fig.savefig(
+                "electricity_generation_%s.pdf" % region,
+                bbox_inches="tight",
+                transparent=True,
+                pad_inches=0,
+            )
             plt.clf()
         # Create generation capacity plot
-        cap = df.filter(**args, variable='Capacity|Electricity|*', region=region)
+        cap = df.filter(**args, variable="Capacity|Electricity|*", region=region)
         if cap:
-            cap.plot.bar(ax=ax, stacked=True, title='Generation Capacity %s' % region)
-            plt.legend(bbox_to_anchor=(0.,-0.25),loc='upper left')
+            cap.plot.bar(ax=ax, stacked=True, title="Generation Capacity %s" % region)
+            plt.legend(bbox_to_anchor=(0.0, -0.25), loc="upper left")
             plt.tight_layout()
-            fig.savefig('capacity_%s.pdf' % region, bbox_inches='tight', transparent=True, pad_inches=0)
+            fig.savefig(
+                "capacity_%s.pdf" % region,
+                bbox_inches="tight",
+                transparent=True,
+                pad_inches=0,
+            )
             plt.clf()
 
     # Create emissions plot
-    emi = df.filter(**args, variable="Emissions|CO2*").filter(region="World", keep=False)
+    emi = df.filter(**args, variable="Emissions|CO2*").filter(
+        region="World", keep=False
+    )
     # print(emi)
     if emi:
-        emi.plot.bar(ax=ax,
-            bars="region", stacked=True, title="CO2 emissions by region", cmap="tab20"
-            )
-        plt.legend(bbox_to_anchor=(1.,1.05),loc='upper left', ncol=2)
-        fig.savefig('emission.pdf', bbox_inches='tight', transparent=True, pad_inches=0)
+        emi.plot.bar(
+            ax=ax,
+            bars="region",
+            stacked=True,
+            title="CO2 emissions by region",
+            cmap="tab20",
+        )
+        plt.legend(bbox_to_anchor=(1.0, 1.05), loc="upper left", ncol=2)
+        fig.savefig("emission.pdf", bbox_inches="tight", transparent=True, pad_inches=0)
         plt.clf()
 
 
@@ -347,135 +404,143 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
     """
     blob = []
     try:
-        for input in config['inputs']:
+        for input in config["inputs"]:
 
-            inputs = read_file(inputs_path, input['osemosys_param'], config['region'])
+            inputs = read_file(inputs_path, input["osemosys_param"], config["region"])
 
-            unit = input['unit']
+            unit = input["unit"]
 
-            technologies = input['variable_cost']
+            technologies = input["variable_cost"]
             data = filter_capacity(inputs, technologies)
 
             if not data.empty:
-                data = data.rename(columns={'REGION': 'region',
-                                            'YEAR': 'year',
-                                            'VALUE': 'value'})
+                data = data.rename(
+                    columns={"REGION": "region", "YEAR": "year", "VALUE": "value"}
+                )
                 iamc = pyam.IamDataFrame(
                     data,
-                    model=config['model'],
-                    scenario=config['scenario'],
-                    variable=input['iamc_variable'],
-                    unit=unit)
+                    model=config["model"],
+                    scenario=config["scenario"],
+                    variable=input["iamc_variable"],
+                    unit=unit,
+                )
                 blob.append(iamc)
     except KeyError:
         pass
 
     try:
-        for result in config['results']:
+        for result in config["results"]:
 
-            if type(result['osemosys_param']) == str:
-                results = read_file(results_path, result['osemosys_param'], config['region'])
+            if type(result["osemosys_param"]) == str:
+                results = read_file(
+                    results_path, result["osemosys_param"], config["region"]
+                )
 
                 try:
-                    technologies = result['technology']
+                    technologies = result["technology"]
                 except KeyError:
                     pass
-                unit = result['unit']
-                if 'fuel' in result.keys():
-                    fuels = result['fuel']
+                unit = result["unit"]
+                if "fuel" in result.keys():
+                    fuels = result["fuel"]
                     data = filter_technology_fuel(results, technologies, fuels)
-                elif 'emissions' in result.keys():
-                    if 'tech_emi' in result.keys():
-                        emission = result['emissions']
-                        technologies = result['tech_emi']
+                elif "emissions" in result.keys():
+                    if "tech_emi" in result.keys():
+                        emission = result["emissions"]
+                        technologies = result["tech_emi"]
                         data = filter_emission_tech(results, emission, technologies)
                     else:
-                        emission = result['emissions']
+                        emission = result["emissions"]
                         data = filter_emission_tech(results, emission)
-                elif 'capacity' in result.keys():
-                    technologies = result['capacity']
+                elif "capacity" in result.keys():
+                    technologies = result["capacity"]
                     data = filter_capacity(results, technologies)
-                elif 'primary_technology' in result.keys():
-                    technologies = result['primary_technology']
+                elif "primary_technology" in result.keys():
+                    technologies = result["primary_technology"]
                     data = filter_capacity(results, technologies)
-                elif 'excluded_prod_tech' in result.keys():
-                    technologies = result['excluded_prod_tech']
+                elif "excluded_prod_tech" in result.keys():
+                    technologies = result["excluded_prod_tech"]
                     data = filter_capacity(results, technologies)
-                elif 'el_prod_technology' in result.keys():
-                    technologies = result['el_prod_technology']
+                elif "el_prod_technology" in result.keys():
+                    technologies = result["el_prod_technology"]
                     data = filter_capacity(results, technologies)
-                elif 'demand' in result.keys():
-                    demands = result['demand']
+                elif "demand" in result.keys():
+                    demands = result["demand"]
                     data = filter_final_energy(results, demands)
                 else:
                     data = extract_results(results, technologies)
 
             else:
                 results = {}
-                for p in result['osemosys_param']:
-                    path_name = os.path.join(results_path, p + '.csv')
+                for p in result["osemosys_param"]:
+                    path_name = os.path.join(results_path, p + ".csv")
                     results[p] = read_file(path_name)
-                if 'trade_tech' in result.keys():
-                    technologies = result['trade_tech']
+                if "trade_tech" in result.keys():
+                    technologies = result["trade_tech"]
                     data = calculate_trade(results, technologies)
 
-            if 'transform' in result.keys():
-                if result['transform'] == 'abs':
-                    data['VALUE'] = data['VALUE'].abs()
+            if "transform" in result.keys():
+                if result["transform"] == "abs":
+                    data["VALUE"] = data["VALUE"].abs()
                 else:
                     pass
 
             if not data.empty:
-                data = data.rename(columns={'REGION': 'region',
-                                            'YEAR': 'year',
-                                            'VALUE': 'value'})
+                data = data.rename(
+                    columns={"REGION": "region", "YEAR": "year", "VALUE": "value"}
+                )
 
                 iamc = pyam.IamDataFrame(
                     data,
-                    model=config['model'],
-                    scenario=config['scenario'],
-                    variable=result['iamc_variable'],
-                    unit=unit)
+                    model=config["model"],
+                    scenario=config["scenario"],
+                    variable=result["iamc_variable"],
+                    unit=unit,
+                )
                 blob.append(iamc)
     except KeyError:
         pass
 
     all_data = pyam.concat(blob)
 
-    all_data = all_data.convert_unit('PJ/yr', to='EJ/yr')
-    all_data = all_data.convert_unit('ktCO2/yr', to='Mt CO2/yr', factor=0.001)
-    all_data = all_data.convert_unit('MEUR_2015/PJ', to='EUR_2020/GJ', factor=1.05)
-    all_data = all_data.convert_unit('kt CO2/yr', to='Mt CO2/yr')
+    all_data = all_data.convert_unit("PJ/yr", to="EJ/yr")
+    all_data = all_data.convert_unit("ktCO2/yr", to="Mt CO2/yr", factor=0.001)
+    all_data = all_data.convert_unit("MEUR_2015/PJ", to="EUR_2020/GJ", factor=1.05)
+    all_data = all_data.convert_unit("kt CO2/yr", to="Mt CO2/yr")
 
     all_data = pyam.IamDataFrame(all_data)
     return all_data
 
 
 def aggregate(func):
-    """Decorator for filters which returns the aggregated data
+    """Decorator for filters which returns the aggregated data"""
 
-    """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         # Get the dataframe from the filter
         data = func(*args, **kwargs)
         # Apply the aggregation
-        data = data.groupby(by=['REGION', 'YEAR']).sum()
+        data = data.groupby(by=["REGION", "YEAR"]).sum()
         # Make the IAMDataFrame
         return pyam.IamDataFrame(
             data,
             model=iam_model,
             scenario=iam_scenario,
             variable=iam_variable,
-            unit=iam_unit)
+            unit=iam_unit,
+        )
+
     return wrapper
+
 
 def entry_point():
 
     args = sys.argv[1:]
 
     if len(args) != 4:
-        print("Usage: osemosys2iamc <inputs_path> <results_path> <config_path> <output_path>")
+        print(
+            "Usage: osemosys2iamc <inputs_path> <results_path> <config_path> <output_path>"
+        )
         exit(1)
 
     inputs_path = args[0]
@@ -487,14 +552,14 @@ def entry_point():
 
     all_data = main(config, inputs_path, results_path)
 
-    model = config['model']
-    scenario = config['scenario']
-    regions = config['region']
+    model = config["model"]
+    scenario = config["scenario"]
+    regions = config["region"]
 
     # Plotting fail reported in [issue 25](https://github.com/OSeMOSYS/osemosys2iamc/issues/25)
     # make_plots(all_data, model, scenario, regions)
 
-    all_data.to_excel(outpath, sheet_name='data')
+    all_data.to_excel(outpath, sheet_name="data")
 
 
 if __name__ == "__main__":
