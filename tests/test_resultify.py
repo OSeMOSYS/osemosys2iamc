@@ -6,7 +6,9 @@ from osemosys2iamc.resultify import (filter_technology_fuel,
                                      filter_emission_tech,
                                      filter_final_energy,
                                      filter_capacity,
-                                     calculate_trade)
+                                     calculate_trade,
+                                     read_file,
+                                     iso_to_country)
 
 
 class TestTrade:
@@ -38,9 +40,9 @@ class TestTrade:
         actual = calculate_trade(results, techs)
 
         expected_data = [
-            ['AT',2014,  5.0],
-            ['AT',2015, -5.0],
-            ['AT',2016, -10.0],
+            ['REGION1',2014,  5.0],
+            ['REGION1',2015, -5.0],
+            ['REGION1',2016, -10.0],
         ]
 
         expected = pd.DataFrame(expected_data, columns=['REGION', 'YEAR', 'VALUE'])
@@ -51,23 +53,23 @@ class TestEmissions:
 
     def test_filter_emission(self):
 
-        filepath = os.path.join("tests", 'fixtures', "AnnualTechnologyEmissions.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "AnnualTechnologyEmissions", "iso2_start")
 
         emission = ['CO2']
         actual = filter_emission_tech(input_data, emission)
 
         data = [
-            ["AT", 2026, -6244.862561],
-            ["AT", 2027, -6529.532083],
-            ["AT", 2030,  3043.148835],
-            ["AT", 2031,  2189.064681],
-            ["AT", 2032,  2315.821267],
-            ["BE", 2026, -2244.982800],
-            ["BE", 2027, -6746.886437],
-            ["BG", 2030, 11096.556931],
-            ["BG", 2031, 11069.257141],
-            ["BG", 2032, 11041.957354]
+            ["AUSTRIA", 2026, -6244.862561],
+            ["AUSTRIA", 2027, -6529.532083],
+            ["AUSTRIA", 2030,  3043.148835],
+            ["AUSTRIA", 2031,  2189.064681],
+            ["AUSTRIA", 2032,  2315.821267],
+            ["BELGIUM", 2026, -2244.982800],
+            ["BELGIUM", 2027, -6746.886437],
+            ["BULGARIA", 2030, 11096.556931],
+            ["BULGARIA", 2031, 11069.257141],
+            ["BULGARIA", 2032, 11041.957354]
         ]
 
         expected = pd.DataFrame(
@@ -78,18 +80,18 @@ class TestEmissions:
 
     def test_filter_tech_emission(self):
 
-        filepath = os.path.join("tests", 'fixtures', "AnnualTechnologyEmissions.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "AnnualTechnologyEmissions", "iso2_start")
 
         tech = ['(?=^.{2}(BM))^.{4}(CS)']
         emission = ['CO2']
         actual = filter_emission_tech(input_data, emission, tech)
 
         data = [
-            ['AT', 2026, -7573.069442598169],
-            ['AT', 2027, -7766.777427515737],
-            ['BE', 2026, -2244.98280006968],
-            ['BE', 2027, -6746.886436926597],
+            ['AUSTRIA', 2026, -7573.069442598169],
+            ['AUSTRIA', 2027, -7766.777427515737],
+            ['BELGIUM', 2026, -2244.98280006968],
+            ['BELGIUM', 2027, -6746.886436926597],
         ]
 
         expected = pd.DataFrame(
@@ -102,8 +104,8 @@ class TestEmissions:
 class TestFilter:
 
     def test_filter_fuel(self):
-        filepath = os.path.join("tests", 'fixtures', "UseByTechnology.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "UseByTechnology", "from_csv")
 
         technologies = ['ALUPLANT']
         fuels = ['C1_P_HCO']
@@ -125,31 +127,31 @@ class TestFilter:
 class TestEnergy:
 
     def test_filter_capacity(self):
-        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "ProductionByTechnologyAnnual", "iso2_start")
 
         technologies = ['^.{6}(I0)','^.{6}(X0)','^.{2}(HY)','^.{2}(OC)','^.{2}(SO)','^.{2}(WI)']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['AT', 2015, 26.324108350683794],
-            ['AT', 2016, 26.324108350683794],
-            ['AT', 2017, 26.324108350683794],
-            ['AT', 2018, 26.324108350683787],
-            ['AT', 2019, 26.324108350683794],
-            ['BE', 2016, 141.0],
-            ['BG', 2015, 1.423512],
-            ['CH', 2047, 69.9750212433476],
-            ['CH', 2048, 91.45662886581975],
-            ['CH', 2049, 76.86770297185006],
-            ['CH', 2050, 70.86078033897608],
-            ['CH', 2051, 53.88447040760964],
-            ['CZ', 2015, 329.5950809],
-            ['DK', 2015, 0.0031536],
-            ['EE', 2015, 28.512108],
-            ['ES', 2015, 26.75595496],
-            ['FI', 2015, 0.296581102],
-            ['FR', 2015, 72.25974846],
+            ['AUSTRIA', 2015, 26.324108350683794],
+            ['AUSTRIA', 2016, 26.324108350683794],
+            ['AUSTRIA', 2017, 26.324108350683794],
+            ['AUSTRIA', 2018, 26.324108350683787],
+            ['AUSTRIA', 2019, 26.324108350683794],
+            ['BELGIUM', 2016, 141.0],
+            ['BULGARIA', 2015, 1.423512],
+            ['CZECHIA', 2015, 329.5950809],
+            ['DENMARK', 2015, 0.0031536],
+            ['ESTONIA', 2015, 28.512108],
+            ['FINLAND', 2015, 0.296581102],
+            ['FRANCE', 2015, 72.25974846],
+            ['SPAIN', 2015, 26.75595496],
+            ['SWITZERLAND', 2047, 69.9750212433476],
+            ['SWITZERLAND', 2048, 91.45662886581975],
+            ['SWITZERLAND', 2049, 76.86770297185006],
+            ['SWITZERLAND', 2050, 70.86078033897608],
+            ['SWITZERLAND', 2051, 53.88447040760964]
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
@@ -157,18 +159,18 @@ class TestEnergy:
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_bm(self):
-        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "ProductionByTechnologyAnnual", "iso2_start")
 
         technologies = ['(?=^.{2}(BM))^.{4}(00)','(?=^.{2}(WS))^.{4}(00)']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['AT',2015,26.324108350683794],
-            ['AT',2016,26.324108350683794],
-            ['AT',2017,26.324108350683794],
-            ['AT',2018,26.324108350683787],
-            ['AT',2019,26.324108350683794],
+            ['AUSTRIA',2015,26.324108350683794],
+            ['AUSTRIA',2016,26.324108350683794],
+            ['AUSTRIA',2017,26.324108350683794],
+            ['AUSTRIA',2018,26.324108350683787],
+            ['AUSTRIA',2019,26.324108350683794],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
@@ -176,18 +178,18 @@ class TestEnergy:
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_co(self):
-        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "ProductionByTechnologyAnnual", "iso2_start")
 
         technologies = ['(?=^.{2}(CO))^.{4}(00)']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['CH',2047,69.9750212433476],
-            ['CH',2048,91.45662886581975],
-            ['CH',2049,76.86770297185006],
-            ['CH',2050,70.86078033897608],
-            ['CH',2051,53.88447040760964],
+            ['SWITZERLAND',2047,69.9750212433476],
+            ['SWITZERLAND',2048,91.45662886581975],
+            ['SWITZERLAND',2049,76.86770297185006],
+            ['SWITZERLAND',2050,70.86078033897608],
+            ['SWITZERLAND',2051,53.88447040760964],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
@@ -195,14 +197,14 @@ class TestEnergy:
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_ng(self):
-        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "ProductionByTechnologyAnnual", "iso2_start")
 
         technologies = ['(?=^.{2}(NG))^.{4}(00)']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['BE',2016,141.0],
+            ['BELGIUM',2016,141.0],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
@@ -210,56 +212,56 @@ class TestEnergy:
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_go(self):
-        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "ProductionByTechnologyAnnual", "iso2_start")
 
         technologies = ['(?=^.{2}(GO))^.{4}(00)']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['BG',2015,1.423512],
+            ['BULGARIA',2015,1.423512],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_hy(self):
-        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "ProductionByTechnologyAnnual", "iso2_start")
 
         technologies = ['^.{2}(HY)']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['CZ',2015,3.3637616987287244],
+            ['CZECHIA',2015,3.3637616987287244],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_nu(self):
-        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "ProductionByTechnologyAnnual", "iso2_start")
 
         technologies = ['^.{2}(UR)']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['CZ',2015,326.2313192401038],
+            ['CZECHIA',2015,326.2313192401038],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_oc(self):
-        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "ProductionByTechnologyAnnual", "iso2_start")
 
         technologies = ['^.{2}(OC)']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['DK',2015,0.0031536000000000003],
+            ['DENMARK',2015,0.0031536000000000003],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
@@ -267,14 +269,14 @@ class TestEnergy:
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_oi(self):
-        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "ProductionByTechnologyAnnual", "iso2_start")
 
         technologies = ['(?=^.{2}(OI))^.{4}(00)','(?=^.{2}(HF))^.{4}(00)']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['EE',2015,28.512107999999998],
+            ['ESTONIA',2015,28.512107999999998],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
@@ -282,14 +284,14 @@ class TestEnergy:
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_so(self):
-        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "ProductionByTechnologyAnnual", "iso2_start")
 
         technologies = ['^.{2}(SO)']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['ES',2015,26.75595496070811],
+            ['SPAIN',2015,26.75595496070811],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
@@ -297,15 +299,15 @@ class TestEnergy:
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_primary_wi(self):
-        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "ProductionByTechnologyAnnual", "iso2_start")
 
         technologies = ['^.{2}(WI)']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['FI', 2015, 0.29658110158442175],
-            ['FR', 2015, 72.25974845531343]
+            ['FINLAND', 2015, 0.29658110158442175],
+            ['FRANCE', 2015, 72.25974845531343]
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
@@ -313,18 +315,18 @@ class TestEnergy:
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_secondary_bm(self):
-        filepath = os.path.join("tests","fixtures","ProductionByTechnologyAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "ProductionByTechnologyAnnual", "iso2_start")
 
         technologies = ['(?=^.{2}(BF))^((?!00).)*$','(?=^.{2}(BM))^((?!00).)*$', '(?=^.{2}(WS))^((?!00).)*$']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['AT', 2042, 0.6636346353894057],
-            ['AT', 2043, 1.3300518531620575],
-            ['AT', 2044, 1.9992691432067637],
-            ['AT', 2045, 2.6713041901899794],
-            ['AT', 2046, 3.4778527409137996]
+            ['AUSTRIA', 2042, 0.6636346353894057],
+            ['AUSTRIA', 2043, 1.3300518531620575],
+            ['AUSTRIA', 2044, 1.9992691432067637],
+            ['AUSTRIA', 2045, 2.6713041901899794],
+            ['AUSTRIA', 2046, 3.4778527409137996]
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR","VALUE"])
@@ -332,15 +334,15 @@ class TestEnergy:
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_final_energy(self):
-        filepath = os.path.join("tests","fixtures","Demand.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "Demand", "iso2_start")
 
-        fuels = ['E2']
+        fuels = ['^.*E2$']
         actual = filter_final_energy(input_data, fuels)
 
         data = [
-            ['AT',2015,227.5944502],
-            ['BE',2016,296.0570016],
+            ['AUSTRIA',2015,227.5944502],
+            ['BELGIUM',2016,296.0570016],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
@@ -350,36 +352,28 @@ class TestEnergy:
 
         pd.testing.assert_frame_equal(actual, expected)
 
-    def test_fuels_format_wrong(self):
-        filepath = os.path.join("tests","fixtures","Demand.csv")
-        input_data = pd.read_csv(filepath)
-        fuels = ['ELE']
-        with pytest.raises(SystemExit) as pytest_wrapped_e:
-            filter_final_energy(input_data, fuels)
-        assert pytest_wrapped_e.type == SystemExit
-        assert pytest_wrapped_e.value.code == 1
-
 class TestCapacity:
 
     def test_filter_inst_capacity(self):
-        filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "TotalCapacityAnnual", "iso2_start")
         technologies = ['^((?!(EL)|(00)).)*$']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['AT',2015,0.446776],
-            ['BE',2016,0.184866],
-            ['BG',2015,4.141],
-            ['CH',2026,0.004563975391582646],
-            ['CY',2015,0.3904880555817921],
-            ['CZ',2015,0.299709],
-            ['DE',2015,9.62143],
-            ['DK',2015,0.0005],
-            ['EE',2015,0.006],
-            ['ES',2015,7.7308],
-            ['FI',2015,0.0263],
-            ['FR',2015,0.47835],
+            ['AUSTRIA',2015,0.446776],
+            ['BELGIUM',2016,0.184866],
+            ['BULGARIA',2015,4.141],
+            ['CYPRUS',2015,0.3904880555817921],
+            ['CZECHIA',2015,0.299709],
+            ['DENMARK',2015,0.0005],
+            ['ESTONIA',2015,0.006],
+            ['FINLAND',2015,0.0263],
+            ['FRANCE',2015,0.47835],
+            ['GERMANY',2015,9.62143],
+            ['SPAIN',2015,7.7308],
+            ['SWITZERLAND',2026,0.004563975391582646]
+            
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
@@ -391,15 +385,15 @@ class TestCapacity:
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_inst_capacity_bio(self):
-        filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "TotalCapacityAnnual", "iso2_start")
         technologies = ['(?=^.{2}(BF))^((?!00).)*$','(?=^.{2}(BM))^((?!00).)*$', '(?=^.{2}(WS))^((?!00).)*$']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['AT',2015,0.446776],
-            ['BE',2016,0.184866],
-            ['FR', 2015, 0.47835],
+            ['AUSTRIA',2015,0.446776],
+            ['BELGIUM',2016,0.184866],
+            ['FRANCE', 2015, 0.47835],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
@@ -407,13 +401,13 @@ class TestCapacity:
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_inst_capacity_coal(self):
-        filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "TotalCapacityAnnual", "iso2_start")
         technologies = ['(?=^.{2}(CO))^((?!00).)*$']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['BG',2015,4.141],
+            ['BULGARIA',2015,4.141],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
@@ -421,13 +415,13 @@ class TestCapacity:
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_inst_capacity_gas(self):
-        filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "TotalCapacityAnnual", "iso2_start")
         technologies = ['(?=^.{2}(NG))^((?!00).)*$']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['DE',2015,9.62143],
+            ['GERMANY',2015,9.62143],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
@@ -435,13 +429,13 @@ class TestCapacity:
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_inst_capacity_geo(self):
-        filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "TotalCapacityAnnual", "iso2_start")
         technologies = ['(?=^.{2}(GO))^((?!00).)*$']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['CH',2026,0.004563975391582646],
+            ['SWITZERLAND',2026,0.004563975391582646],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
@@ -449,13 +443,13 @@ class TestCapacity:
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_inst_capacity_hydro(self):
-        filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "TotalCapacityAnnual", "iso2_start")
         technologies = ['^.{2}(HY)']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['CZ',2015,0.299709],
+            ['CZECHIA',2015,0.299709],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
@@ -463,13 +457,13 @@ class TestCapacity:
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_inst_capacity_nuclear(self):
-        filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "TotalCapacityAnnual", "iso2_start")
         technologies = ['^.{2}(NU)']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['ES',2015,7.7308],
+            ['SPAIN',2015,7.7308],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
@@ -477,13 +471,13 @@ class TestCapacity:
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_inst_capacity_ocean(self):
-        filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "TotalCapacityAnnual", "iso2_start")
         technologies = ['^.{2}(OC)']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['DK',2015,0.0005],
+            ['DENMARK',2015,0.0005],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
@@ -491,13 +485,13 @@ class TestCapacity:
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_inst_capacity_oil(self):
-        filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "TotalCapacityAnnual", "iso2_start")
         technologies = ['(?=^.{2}(HF))^((?!00).)*$']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['CY',2015,0.3904880555817921],
+            ['CYPRUS',2015,0.3904880555817921],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
@@ -505,13 +499,13 @@ class TestCapacity:
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_inst_capacity_solar(self):
-        filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "TotalCapacityAnnual", "iso2_start")
         technologies = ['^.{2}(SO)']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['EE',2015,0.006],
+            ['ESTONIA',2015,0.006],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
@@ -519,13 +513,13 @@ class TestCapacity:
         pd.testing.assert_frame_equal(actual, expected)
 
     def test_filter_inst_capacity_wi_offshore(self):
-        filepath = os.path.join("tests","fixtures","TotalCapacityAnnual.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "TotalCapacityAnnual", "iso2_start")
         technologies = ['(?=^.{2}(WI))^.{4}(OF)']
         actual = filter_capacity(input_data, technologies)
 
         data = [
-            ['FI',2015,0.0263],
+            ['FINLAND',2015,0.0263],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
@@ -535,16 +529,16 @@ class TestCapacity:
 class TestPrice:
 
     def test_price_bm(self):
-        filepath = os.path.join("tests","fixtures","VariableCost.csv")
-        input_data = pd.read_csv(filepath)
+        folderpath = os.path.join("tests","fixtures")
+        input_data = read_file(folderpath, "VariableCost", "iso2_start")
         commodity = ['(?=^.{2}(BM))^.{6}(X0)']
         actual = filter_capacity(input_data, commodity)
 
         data = [
-            ['AT',2015,3.0],
-            ['AT',2016,4.0],
-            ['BE',2015,1.7],
-            ['BE',2016,1.8],
+            ['AUSTRIA',2015,3.0],
+            ['AUSTRIA',2016,4.0],
+            ['BELGIUM',2015,1.7],
+            ['BELGIUM',2016,1.8],
         ]
 
         expected = pd.DataFrame(data=data, columns=["REGION", "YEAR", "VALUE"])
@@ -553,3 +547,59 @@ class TestPrice:
         print(expected)
 
         pd.testing.assert_frame_equal(actual, expected)
+
+class TestCountryConversion:
+
+    def test_iso_to_country_iso2start(self):
+        techs = ['NGNGA2', 'DENGA2', 'NGKENGX', 'ZXNGA']
+
+        actual = iso_to_country('iso2_start', techs, 'TotalCapacityAnnual')
+
+        expected = ['NIGERIA', 'GERMANY', 'NIGERIA', '']
+
+        assert actual == expected
+
+    def test_iso_to_country_iso3start(self):
+        techs = ['NGANGA', 'BHSHYA', 'TCASOA', 'ZXNGA']
+
+        actual = iso_to_country('iso3_start', techs, 'TotalCapacityAnnual')
+
+        expected = ['NIGERIA', 'BAHAMAS', 'TURKS AND CAICOS ISLANDS', '']
+
+        assert actual == expected
+
+    def test_iso_to_country_iso2end(self):
+        techs = ['NGA2NG', 'NGA2DE', 'KENGXNG', 'NGAZX']
+
+        actual = iso_to_country('iso2_end', techs, 'TotalCapacityAnnual')
+
+        expected = ['NIGERIA', 'GERMANY', 'NIGERIA', '']
+
+        assert actual == expected
+
+    def test_iso_to_country_iso3end(self):
+        techs = ['NGANGA', 'HYABHS', 'SOATCA', 'NGAZX']
+
+        actual = iso_to_country('iso3_end', techs, 'TotalCapacityAnnual')
+
+        expected = ['NIGERIA', 'BAHAMAS', 'TURKS AND CAICOS ISLANDS', '']
+
+        assert actual == expected
+
+    def test_iso_to_country_iso2middle(self):
+        techs = ['NGA2NGZZ', 'NGA2DEVV', 'NGAZXVV', 'CZF']
+
+        actual = iso_to_country('iso2_5', techs, 'TotalCapacityAnnual')
+
+        expected = ['NIGERIA', 'GERMANY', '', '']
+
+        assert actual == expected
+
+    def test_iso_to_country_iso3middle(self):
+        techs = ['NGANGAGHAPP', 'HYABHSLCA', 'ABWBMUABC', 'NGAZX']
+
+        actual = iso_to_country('iso3_7', techs, 'TotalCapacityAnnual')
+
+        expected = ['GHANA', 'SAINT LUCIA', '', '']
+
+        assert actual == expected

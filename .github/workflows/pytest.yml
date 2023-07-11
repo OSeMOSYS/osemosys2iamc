@@ -40,11 +40,5 @@ jobs:
       run: |
         pip install .
 
-
-    - name: Install editable openentrance
-      run: |
-        pip uninstall --yes openentrance
-        pip install -e git+https://github.com/openENTRANCE/openentrance.git@main#egg=openentrance
-
     - name: Test with pytest
       run: pytest
