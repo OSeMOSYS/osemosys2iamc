@@ -14,10 +14,10 @@ This work was financially supported by:
 <img
   src="docs/images/ecemf.png"
   alt="European Climate and Energy Modelling Forum Logo"
-  style="display: inline-block; margin: 100 auto; max-height: 100px"><img
+  style="display: inline-block; margin: 100 auto; height: 100px"><img
   src="docs/images/iamcompact.png"
   alt="IAM COMPACT Logo"
-  style="display: inline-block; margin: 100 auto; max-height: 100px">
+  style="display: inline-block; margin: 100 auto; height: 100px">
 
 ## Install from Python Packaging Index (PyPI)
 
