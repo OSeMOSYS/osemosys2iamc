@@ -1,10 +1,15 @@
 # osemosys2iamc
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7473185.svg)](https://doi.org/10.5281/zenodo.7473185)
+
 Convert OSeMOSYS results to IAMC format
 
 ## Acknowledgements
 
-This work was financially supported by the European Union’s Horizon 2020 research and innovation programme under the grant agreement No 101022622 ([European Climate and Energy Modelling Forum ECEMF](https://doi.org/10.3030/101022622)).
+This work was financially supported by:
+
+- The European Union’s Horizon 2020 research and innovation programme under the grant agreement No 101022622 ([European Climate and Energy Modelling Forum ECEMF](https://doi.org/10.3030/101022622))
+- The [IAM COMPACT](https://doi.org/10.3030/101056306) project has received funding from the European Union’s HORIZON EUROPE Research and Innovation Programme under grant agreement No 101056306
 
 ## Install from Github repository
 
