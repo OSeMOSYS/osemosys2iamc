@@ -26,6 +26,11 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import re
 
+# Creates an alias for United Kingdom and Greece using alternate 2-letter code
+# (see issue https://github.com/OSeMOSYS/osemosys2iamc/issues/33)
+countries_by_alpha2["UK"] = countries_by_alpha2["GB"]
+countries_by_alpha2["EL"] = countries_by_alpha2["GR"]
+
 
 def iso_to_country(
     iso_format: str, index: List[str], osemosys_param: str
@@ -472,6 +477,7 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
 
             elif isinstance(result["osemosys_param"], list):
                 results = {}
+                unit = result["unit"]
                 for p in result["osemosys_param"]:
                     results[p] = read_file(results_path, p, config["region"])
 
@@ -510,15 +516,18 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
     except KeyError:
         pass
 
-    all_data = pyam.concat(blob)
+    if len(blob) > 0:
+        all_data = pyam.concat(blob)
 
-    all_data = all_data.convert_unit("PJ/yr", to="EJ/yr")
-    all_data = all_data.convert_unit("ktCO2/yr", to="Mt CO2/yr", factor=0.001)
-    all_data = all_data.convert_unit("MEUR_2015/PJ", to="EUR_2020/GJ", factor=1.05)
-    all_data = all_data.convert_unit("kt CO2/yr", to="Mt CO2/yr")
+        all_data = all_data.convert_unit("PJ/yr", to="EJ/yr")
+        all_data = all_data.convert_unit("ktCO2/yr", to="Mt CO2/yr", factor=0.001)
+        all_data = all_data.convert_unit("MEUR_2015/PJ", to="EUR_2020/GJ", factor=1.05)
+        all_data = all_data.convert_unit("kt CO2/yr", to="Mt CO2/yr")
 
-    all_data = pyam.IamDataFrame(all_data)
-    return all_data
+        all_data = pyam.IamDataFrame(all_data)
+        return all_data
+    else:
+        raise ValueError("No data found")
 
 
 def aggregate(func):

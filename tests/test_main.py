@@ -108,3 +108,46 @@ def test_main_result_capture():
     )
 
     assert_iamframe_equal(actual, expected)
+
+
+def test_main_trade():
+    """Test operation of trade filter
+
+    Config
+    ------
+        - iamc_variable: Trade|Secondary Energy|Electricity|Volume
+          osemosys_param:
+          - UseByTechnology
+          - ProductionByTechnologyAnnual
+          trade_tech:
+          - (?=^.{2}(EL))^((?!00).)*$
+          unit: PJ/yr
+
+    """
+
+    config_path = os.path.join("tests", "fixtures", "trade", "config_trade.yaml")
+    inputs_path = os.path.join("tests", "fixtures", "trade")
+    results_path = os.path.join("tests", "fixtures", "trade")
+
+    with open(config_path, "r") as config_file:
+        config = load(config_file, Loader=SafeLoader)
+
+    actual = main(config, inputs_path, results_path)
+
+    data = pd.DataFrame(
+        [
+            ["Austria", "Trade|Secondary Energy|Electricity|Volume", 2010, -0.024824],
+            ["Austria", "Trade|Secondary Energy|Electricity|Volume", 2011, -0.024924],
+            ["Austria", "Trade|Secondary Energy|Electricity|Volume", 2012, -0.025024],
+        ],
+        columns=["region", "variable", "year", "value"],
+    )
+
+    expected = IamDataFrame(
+        data,
+        model="OSeMBE v1.0.0",
+        scenario="DIAG-C400-lin-ResidualFossil",
+        unit="EJ/yr",
+    )
+
+    assert_iamframe_equal(actual, expected)

@@ -613,3 +613,9 @@ class TestCountryConversion:
         expected = ["Ghana", "Saint Lucia", "", ""]
 
         assert actual == expected
+
+    def test_iso_to_country_uk(self):
+        techs = ["UKNGA"]
+        actual = iso_to_country("iso2_start", techs, "TotalCapacityAnnual")
+        expected = ["United Kingdom of Great Britain and Northern Ireland"]
+        assert actual == expected

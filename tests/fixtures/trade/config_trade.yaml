@@ -1,0 +1,11 @@
+model: OSeMBE v1.0.0
+scenario: DIAG-C400-lin-ResidualFossil
+region: 'iso2_start' #iso2_x, iso3_x, from_csv, or a name of a country/region [substitute x with start, end, or a positive number]
+results:
+- iamc_variable: Trade|Secondary Energy|Electricity|Volume
+  osemosys_param:
+  - UseByTechnology
+  - ProductionByTechnologyAnnual
+  trade_tech:
+  - (?=^.{2}(EL))^((?!00).)*$
+  unit: PJ/yr
