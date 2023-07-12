@@ -2,18 +2,26 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7473185.svg)](https://doi.org/10.5281/zenodo.7473185)
 
-Convert OSeMOSYS results to IAMC format
+Use this Python package to convert OSeMOSYS results to the IAMC format
 
 ## Acknowledgements
 
 This work was financially supported by:
 
-- The European Union’s Horizon 2020 research and innovation programme under the grant agreement No 101022622 ([European Climate and Energy Modelling Forum ECEMF](https://doi.org/10.3030/101022622))
+- The [European Climate and Energy Modelling Forum (ECEMF)](https://doi.org/10.3030/101022622) has received funding from the European Union’s Horizon 2020 Research and Innovation programme under the grant agreement No 101022622
 - The [IAM COMPACT](https://doi.org/10.3030/101056306) project has received funding from the European Union’s HORIZON EUROPE Research and Innovation Programme under grant agreement No 101056306
 
-## Install from Github repository
+<img
+  src="docs/images/ecemf.png"
+  alt="European Climate and Energy Modelling Forum Logo"
+  style="display: inline-block; margin: 100 auto; max-height: 100px"><img
+  src="docs/images/iamcompact.png"
+  alt="IAM COMPACT Logo"
+  style="display: inline-block; margin: 100 auto; max-height: 100px">
 
-    pip install git+https://github.com/osemosys/osemosys2iamc@main#egg=osemosys2iamc
+## Install from Python Packaging Index (PyPI)
+
+    pip install osemosys2iamc
 
 ## Run the package
 
