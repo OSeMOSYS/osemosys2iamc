@@ -522,6 +522,7 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
         all_data = all_data.convert_unit("PJ/yr", to="EJ/yr")
         all_data = all_data.convert_unit("ktCO2/yr", to="Mt CO2/yr", factor=0.001)
         all_data = all_data.convert_unit("MEUR_2015/PJ", to="EUR_2020/GJ", factor=1.05)
+        all_data = all_data.convert_unit("MEUR_2015/GW", to="EUR_2020/kW", factor=1.05)
         all_data = all_data.convert_unit("kt CO2/yr", to="Mt CO2/yr")
 
         all_data = pyam.IamDataFrame(all_data)
