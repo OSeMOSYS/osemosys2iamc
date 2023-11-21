@@ -408,6 +408,9 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
         Path to a folder of CSV files (OSeMOSYS results)
     """
     blob = []
+    filename = os.path.join(inputs_path, "YEAR.csv")
+    years = pd.read_csv(filename)
+
     try:
         for input in config["inputs"]:
 
@@ -415,8 +418,16 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
 
             unit = input["unit"]
 
-            technologies = input["variable_cost"]
-            data = filter_capacity(inputs, technologies)
+            if "variable_cost" in input.keys():
+                technologies = input["variable_cost"]
+                data = filter_capacity(inputs, technologies)
+            elif "reg_tech_param" in input.keys():
+                technologies = input["reg_tech_param"]
+                data = filter_technologies(inputs, technologies)
+                list_years = years['VALUE']
+                data['YEAR'] = [list_years]*len(data)
+                data = data.explode('YEAR').reset_index(drop=True)
+                data = data.drop(['TECHNOLOGY'], axis=1)
 
             if not data.empty:
                 data = data.rename(
