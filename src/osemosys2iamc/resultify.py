@@ -424,10 +424,10 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
             elif "reg_tech_param" in input.keys():
                 technologies = input["reg_tech_param"]
                 data = filter_technologies(inputs, technologies)
-                list_years = years['VALUE']
-                data['YEAR'] = [list_years]*len(data)
-                data = data.explode('YEAR').reset_index(drop=True)
-                data = data.drop(['TECHNOLOGY'], axis=1)
+                list_years = years["VALUE"]
+                data["YEAR"] = [list_years] * len(data)
+                data = data.explode("YEAR").reset_index(drop=True)
+                data = data.drop(["TECHNOLOGY"], axis=1)
 
             if not data.empty:
                 data = data.rename(
