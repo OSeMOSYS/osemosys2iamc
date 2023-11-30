@@ -349,7 +349,7 @@ def make_plots(df: pyam.IamDataFrame, model: str, scenario: str, regions: List[s
         if se:
             locator = mdates.AutoDateLocator(minticks=10)
             # locator.intervald['YEARLY'] = [10]
-            pe.plot.bar(ax=ax, stacked=True, title="Power generation mix %s" % region)
+            se.plot.bar(ax=ax, stacked=True, title="Power generation mix %s" % region)
             plt.legend(bbox_to_anchor=(0.0, -0.5), loc="upper left")
             plt.tight_layout()
             ax.xaxis.set_major_locator(locator)
