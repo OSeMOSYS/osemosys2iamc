@@ -349,7 +349,7 @@ def make_plots(df: pyam.IamDataFrame, model: str, scenario: str, regions: List[s
         if se:
             locator = mdates.AutoDateLocator(minticks=10)
             # locator.intervald['YEARLY'] = [10]
-            pe.plot.bar(ax=ax, stacked=True, title="Power generation mix %s" % region)
+            se.plot.bar(ax=ax, stacked=True, title="Power generation mix %s" % region)
             plt.legend(bbox_to_anchor=(0.0, -0.5), loc="upper left")
             plt.tight_layout()
             ax.xaxis.set_major_locator(locator)
@@ -408,6 +408,9 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
         Path to a folder of CSV files (OSeMOSYS results)
     """
     blob = []
+    filename = os.path.join(inputs_path, "YEAR.csv")
+    years = pd.read_csv(filename)
+
     try:
         for input in config["inputs"]:
 
@@ -415,8 +418,16 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
 
             unit = input["unit"]
 
-            technologies = input["variable_cost"]
-            data = filter_capacity(inputs, technologies)
+            if "variable_cost" in input.keys():
+                technologies = input["variable_cost"]
+                data = filter_capacity(inputs, technologies)
+            elif "reg_tech_param" in input.keys():
+                technologies = input["reg_tech_param"]
+                data = filter_technologies(inputs, technologies)
+                list_years = years["VALUE"]
+                data["YEAR"] = [list_years] * len(data)
+                data = data.explode("YEAR").reset_index(drop=True)
+                data = data.drop(["TECHNOLOGY"], axis=1)
 
             if not data.empty:
                 data = data.rename(
@@ -522,6 +533,7 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
         all_data = all_data.convert_unit("PJ/yr", to="EJ/yr")
         all_data = all_data.convert_unit("ktCO2/yr", to="Mt CO2/yr", factor=0.001)
         all_data = all_data.convert_unit("MEUR_2015/PJ", to="EUR_2020/GJ", factor=1.05)
+        all_data = all_data.convert_unit("MEUR_2015/GW", to="EUR_2020/kW", factor=1.05)
         all_data = all_data.convert_unit("kt CO2/yr", to="Mt CO2/yr")
 
         all_data = pyam.IamDataFrame(all_data)
