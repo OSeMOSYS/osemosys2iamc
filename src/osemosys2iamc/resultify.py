@@ -537,12 +537,14 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
         all_data = all_data.convert_unit("kt CO2/yr", to="Mt CO2/yr")
 
         dic_country_name_variants = {
-            'Netherlands': 'The Netherlands',
-            'Czechia': "Czech Republic",
-            "United Kingdom of Great Britain and Northern Ireland": "United Kingdom"
-            }
+            "Netherlands": "The Netherlands",
+            "Czechia": "Czech Republic",
+            "United Kingdom of Great Britain and Northern Ireland": "United Kingdom",
+        }
         for c in dic_country_name_variants:
-            all_data.data['region'] = all_data.data['region'].str.replace(c, dic_country_name_variants[c])
+            all_data.data["region"] = all_data.data["region"].str.replace(
+                c, dic_country_name_variants[c]
+            )
 
         all_data = pyam.IamDataFrame(all_data)
         return all_data
