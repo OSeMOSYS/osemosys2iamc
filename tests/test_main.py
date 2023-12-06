@@ -54,7 +54,7 @@ def test_main_result():
             ["Belgium", "Capacity|Electricity", 2016, 0.184866],
             ["Bulgaria", "Capacity|Electricity", 2015, 4.141],
             ["Cyprus", "Capacity|Electricity", 2015, 0.3904880555817921],
-            ["Czechia", "Capacity|Electricity", 2015, 0.299709],
+            ["Czech Republic", "Capacity|Electricity", 2015, 0.299709],
             ["Denmark", "Capacity|Electricity", 2015, 0.0005],
             ["Estonia", "Capacity|Electricity", 2015, 0.006],
             ["Finland", "Capacity|Electricity", 2015, 0.0263],
