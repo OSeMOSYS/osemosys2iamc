@@ -530,11 +530,22 @@ def main(config: Dict, inputs_path: str, results_path: str) -> pyam.IamDataFrame
     if len(blob) > 0:
         all_data = pyam.concat(blob)
 
-        all_data = all_data.convert_unit("PJ/yr", to="EJ/yr")
-        all_data = all_data.convert_unit("ktCO2/yr", to="Mt CO2/yr", factor=0.001)
-        all_data = all_data.convert_unit("MEUR_2015/PJ", to="EUR_2020/GJ", factor=1.05)
-        all_data = all_data.convert_unit("MEUR_2015/GW", to="EUR_2020/kW", factor=1.05)
-        all_data = all_data.convert_unit("kt CO2/yr", to="Mt CO2/yr")
+        all_data.convert_unit("PJ/yr", to="EJ/yr", inplace=True)
+        all_data.convert_unit("ktCO2/yr", to="Mt CO2/yr", factor=0.001, inplace=True)
+        all_data.convert_unit(
+            "MEUR_2015/PJ", to="EUR_2020/GJ", factor=1.05, inplace=True
+        )
+        all_data.convert_unit(
+            "MEUR_2015/GW", to="EUR_2020/kW", factor=1.05, inplace=True
+        )
+        all_data.convert_unit("kt CO2/yr", to="Mt CO2/yr", inplace=True)
+
+        dic_country_name_variants = {
+            "Netherlands": "The Netherlands",
+            "Czechia": "Czech Republic",
+            "United Kingdom of Great Britain and Northern Ireland": "United Kingdom",
+        }
+        all_data.rename(region=dic_country_name_variants, inplace=True)
 
         all_data = pyam.IamDataFrame(all_data)
         return all_data
